@@ -8,28 +8,286 @@
     <style>
         body { margin: 0; padding: 0; font-family: 'Malgun Gothic', sans-serif; }
         #map { width: 100%; height: 100vh; }
+        
+        /* 오른쪽 상단 검색 및 출근/퇴근 필터 패널 */
+        .search-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 350px;
+            max-width: calc(100vw - 40px);
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 15px;
+            z-index: 1000;
+            box-sizing: border-box;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .panel-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #212529;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* 출근 / 퇴근 / 전체 탭 */
+        .mode-tabs {
+            display: flex;
+            background: #f1f3f5;
+            border-radius: 8px;
+            padding: 4px;
+            margin-bottom: 10px;
+            gap: 4px;
+        }
+        .mode-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 8px 4px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .mode-btn:hover {
+            color: #212529;
+            background: rgba(255, 255, 255, 0.7);
+        }
+        .mode-btn.active {
+            color: white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+        .mode-btn[data-mode="출근"].active {
+            background: #E03131;
+        }
+        .mode-btn[data-mode="퇴근"].active {
+            background: #1971C2;
+        }
+        .mode-btn[data-mode="전체"].active {
+            background: #495057;
+        }
+
+        /* 검색 입력창 */
+        .search-box {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .search-input-wrapper {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            font-size: 13px;
+            color: #868e96;
+            pointer-events: none;
+        }
+        .search-input-wrapper input {
+            width: 100%;
+            padding: 9px 28px 9px 30px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .search-input-wrapper input:focus {
+            border-color: #339af0;
+            box-shadow: 0 0 0 3px rgba(51, 154, 240, 0.18);
+        }
+        .clear-btn {
+            position: absolute;
+            right: 8px;
+            background: #dee2e6;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 11px;
+            color: #495057;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            line-height: 1;
+        }
+        .clear-btn:hover {
+            background: #ced4da;
+        }
+        .search-submit-btn {
+            border: none;
+            background: #339af0;
+            color: white;
+            padding: 9px 13px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+        .search-submit-btn:hover {
+            background: #1c7ed6;
+        }
+
+        /* 상태 텍스트 */
+        .search-status {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #495057;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .search-status .badge-count {
+            font-weight: 700;
+            color: #1c7ed6;
+        }
+        .search-status .empty-notice {
+            color: #e03131;
+            font-weight: 600;
+        }
+
+        /* 검색 결과 리스트 드롭다운 */
+        .search-results-list {
+            margin-top: 10px;
+            max-height: 220px;
+            overflow-y: auto;
+            border-top: 1px solid #e9ecef;
+            padding-top: 6px;
+        }
+        .search-result-item {
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            border-bottom: 1px solid #f8f9fa;
+            transition: background 0.15s;
+        }
+        .search-result-item:hover {
+            background: #e7f5ff;
+        }
+        .result-title {
+            font-weight: 600;
+            color: #212529;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .result-sub {
+            color: #868e96;
+            margin-top: 2px;
+            font-size: 11px;
+        }
+        .tag-badge {
+            display: inline-block;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .tag-badge.badge-in {
+            background: #FFE3E3;
+            color: #C92A2A;
+        }
+        .tag-badge.badge-out {
+            background: #D0EBFF;
+            color: #1864AB;
+        }
+
+        /* 범례 */
         .legend {
             position: absolute; bottom: 20px; right: 20px; background: white;
-            padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            font-size: 12px; z-index: 1000; max-height: 300px; overflow-y: auto;
+            padding: 10px 14px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            font-size: 12px; z-index: 1000; max-height: 260px; overflow-y: auto;
+            border: 1px solid rgba(0,0,0,0.08);
         }
+        .legend-title { font-weight: bold; margin-bottom: 6px; color: #333; }
         .legend-item { display: flex; align-items: center; margin-bottom: 5px; }
-        .legend-color { width: 15px; height: 15px; border-radius: 3px; margin-right: 5px; opacity: 0.6; }
+        .legend-color { width: 14px; height: 14px; border-radius: 3px; margin-right: 6px; opacity: 0.7; flex-shrink: 0; }
+        
+        /* 팝업 스타일 */
         .custom-popup { font-size: 13px; line-height: 1.5; min-width: 220px; }
-        .custom-popup h4 { margin: 0 0 8px 0; color: #333; border-bottom: 2px solid #FF6B6B; padding-bottom: 5px; font-size: 15px; }
+        .custom-popup h4 { margin: 0 0 8px 0; color: #333; border-bottom: 2px solid #FF6B6B; padding-bottom: 5px; font-size: 15px; display: flex; align-items: center; gap: 5px; }
+        .custom-popup.commute-out h4 { border-bottom-color: #1971C2; }
         .custom-popup p { margin: 3px 0; color: #555; }
         .custom-popup .highlight { color: #D63384; font-weight: bold; }
         .custom-popup .time-box { background: #F8F9FA; padding: 8px; border-radius: 4px; margin-top: 5px; font-size: 12px; border-left: 3px solid #FF6B6B; }
+        .custom-popup.commute-out .time-box { border-left-color: #1971C2; }
         .order-badge { background: #FF6B6B; color: #fff; padding: 2px 7px; border-radius: 10px; font-size: 12px; font-weight: bold; display: inline-block; margin-bottom: 4px; }
-        .route-stop-list { margin-top: 8px; padding-top: 6px; border-top: 1px dashed #ddd; max-height: 120px; overflow-y: auto; font-size: 12px; }
+        .custom-popup.commute-out .order-badge { background: #1971C2; }
+        .route-stop-list { margin-top: 8px; padding-top: 6px; border-top: 1px dashed #ddd; max-height: 130px; overflow-y: auto; font-size: 12px; }
         .route-stop-item { padding: 2px 4px; border-radius: 3px; color: #555; }
         .route-stop-item.active { background: #FFE3E3; color: #C92A2A; font-weight: bold; }
+        .custom-popup.commute-out .route-stop-item.active { background: #E7F5FF; color: #1864AB; }
+        
+        /* 순서 번호 마커 */
         .seq-marker { background: #E03131; color: white; border: 2px solid white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+        .seq-marker.commute-out-marker { background: #1971C2; }
         .seq-marker.selected { background: #1971C2; transform: scale(1.15); }
+        .seq-marker.commute-out-marker.selected { background: #E03131; transform: scale(1.15); }
+
+        @media (max-width: 600px) {
+            .search-panel { top: 10px; right: 10px; left: 10px; width: auto; max-width: none; }
+            .legend { bottom: 10px; right: 10px; max-height: 180px; }
+        }
     </style>
 </head>
 <body>
     <div id="map"></div>
+    
+    <!-- 오른쪽 상단 검색 및 출퇴근 필터 패널 -->
+    <div class="search-panel" id="searchPanel">
+        <div class="panel-header">
+            <span class="panel-title">🚌 버스 노선 조회</span>
+        </div>
+        <div class="mode-tabs">
+            <button type="button" class="mode-btn active" data-mode="출근" id="btnModeCommuteIn">
+                <span>🌅 출근</span>
+            </button>
+            <button type="button" class="mode-btn" data-mode="퇴근" id="btnModeCommuteOut">
+                <span>🌇 퇴근</span>
+            </button>
+            <button type="button" class="mode-btn" data-mode="전체" id="btnModeAll">
+                <span>🔄 전체</span>
+            </button>
+        </div>
+        <div class="search-box">
+            <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="정류장, 노선명, 지역 검색..." autocomplete="off" />
+                <button type="button" id="searchClearBtn" class="clear-btn" title="검색어 지우기">✕</button>
+            </div>
+            <button type="button" id="searchBtn" class="search-submit-btn">검색</button>
+        </div>
+        <div class="search-status" id="searchStatus">
+            <span id="statusText">출근 정류장 불러오는 중...</span>
+        </div>
+        <div class="search-results-list" id="searchResultsList" style="display: none;"></div>
+    </div>
+
     <div class="legend" id="legend"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -49,10 +307,37 @@
             '용인(수지)': '#A2D2FF', '인천/부천': '#63E6BE'
         };
 
+        const regionLayer = L.layerGroup().addTo(map);
+        const markerLayer = L.layerGroup().addTo(map);
+
         let currentPolyline = null;
         let currentOrderMarkers = [];
         let routeGroups = {};
-        let allMarkers = [];
+        let currentMode = '출근'; // '출근' | '퇴근' | '전체'
+        let currentKeyword = '';
+
+        // 출근/퇴근 자동 판별 함수 (향후 퇴근 노선 데이터 추가 시 유연하게 자동 지원)
+        function getItemType(item) {
+            const rawType = item['구분'] || item['노선구분'] || item['유형'] || item['type'];
+            if (rawType) {
+                if (rawType.includes('퇴근')) return '퇴근';
+                if (rawType.includes('출근')) return '출근';
+            }
+            const route = item['노선명'] || '';
+            if (route.includes('퇴근')) return '퇴근';
+            if (route.includes('출근')) return '출근';
+
+            const origin = item['기점출발'] || '';
+            if (origin.includes('퇴근')) return '퇴근';
+            if (origin.includes('출근')) return '출근';
+
+            const boarding = item['승차정류장'] || '';
+            const dropoff = item['하차정류장'] || '';
+            if (dropoff.includes('회사') || dropoff.includes('캠퍼스') || dropoff.includes('사업장')) return '출근';
+            if (boarding.includes('회사') || boarding.includes('캠퍼스') || boarding.includes('사업장')) return '퇴근';
+
+            return '출근';
+        }
 
         function clearRouteOverlay() {
             if (currentPolyline) {
@@ -63,110 +348,311 @@
             currentOrderMarkers = [];
         }
 
-        // 노선별 그룹화
+        // 노선별 그룹화 (출근/퇴근 구분 분리)
         busData.forEach(item => {
-            const routeName = item['노선명'];
-            if (!routeGroups[routeName]) routeGroups[routeName] = [];
-            routeGroups[routeName].push(item);
+            item._type = getItemType(item);
+            const routeKey = `${item._type}__${item['노선명']}`;
+            if (!routeGroups[routeKey]) routeGroups[routeKey] = [];
+            routeGroups[routeKey].push(item);
         });
 
-        // 지역별 연한 원 그리기
-        const regions = {};
-        busData.forEach(item => {
-            const region = item['지역'] || '기타';
-            if (!regions[region]) regions[region] = [];
-            regions[region].push(item);
-        });
+        // 정류장 선택 시 (마커 클릭 또는 검색 목록 클릭)
+        function selectStop(item, marker, zoomIn = false) {
+            clearRouteOverlay();
 
-        Object.keys(regions).forEach(regionName => {
-            const points = regions[regionName].map(item => [item.lat, item.lng]);
-            const bounds = L.latLngBounds(points);
-            const color = regionColors[regionName] || '#CCCCCC';
-            L.circle(bounds.getCenter(), {
-                radius: 5000, color: color, fillColor: color, fillOpacity: 0.1, weight: 2
-            }).addTo(map);
-        });
+            const routeType = item._type || getItemType(item);
+            const routeKey = `${routeType}__${item['노선명']}`;
+            const sameRoute = (routeGroups[routeKey] || [item]).slice().sort((a, b) => a['순번'] - b['순번']);
+            const latlngs = sameRoute.map(d => [d.lat, d.lng]);
 
-        // 범례
-        const legendDiv = document.getElementById('legend');
-        Object.keys(regions).forEach(regionName => {
-            const color = regionColors[regionName] || '#CCCCCC';
-            legendDiv.innerHTML += `<div class="legend-item"><div class="legend-color" style="background:${color}"></div><span>${regionName}</span></div>`;
-        });
+            // 같은 노선 선으로 연결 (출근: 빨간색, 퇴근: 파란색)
+            if (latlngs.length > 1) {
+                const lineColor = routeType === '퇴근' ? '#1971C2' : '#FF0000';
+                currentPolyline = L.polyline(latlngs, {
+                    color: lineColor, weight: 4, opacity: 0.8, dashArray: '5, 10'
+                }).addTo(map);
+            }
 
-        // 마커 찍기 및 이벤트
-        busData.forEach(item => {
-            const marker = L.marker([item.lat, item.lng]).addTo(map);
-            allMarkers.push(marker);
-
-            marker.on('click', function() {
-                // 기존 선 및 순서 마커 지우기
-                clearRouteOverlay();
-
-                const routeName = item['노선명'];
-                const sameRoute = routeGroups[routeName].slice().sort((a, b) => a['순번'] - b['순번']);
-                const latlngs = sameRoute.map(d => [d.lat, d.lng]);
-
-                // 같은 노선 선으로 연결
-                if (latlngs.length > 1) {
-                    currentPolyline = L.polyline(latlngs, {
-                        color: '#FF0000', weight: 4, opacity: 0.8, dashArray: '5, 10'
-                    }).addTo(map);
-                }
-
-                // 같은 노선의 각 정류장 위에 순서 배지 마커 표시
-                sameRoute.forEach(stop => {
-                    const isSelected = stop['순번'] === item['순번'];
-                    const seqIcon = L.divIcon({
-                        className: '',
-                        html: `<div class="seq-marker ${isSelected ? 'selected' : ''}">${stop['순번']}</div>`,
-                        iconSize: [24, 24],
-                        iconAnchor: [12, 12]
-                    });
-                    const seqMarker = L.marker([stop.lat, stop.lng], { icon: seqIcon, interactive: false, zIndexOffset: 1000 }).addTo(map);
-                    currentOrderMarkers.push(seqMarker);
+            // 같은 노선의 각 정류장 위에 순서 배지 마커 표시
+            sameRoute.forEach(stop => {
+                const isSelected = stop['순번'] === item['순번'];
+                const seqIcon = L.divIcon({
+                    className: '',
+                    html: `<div class="seq-marker ${routeType === '퇴근' ? 'commute-out-marker' : ''} ${isSelected ? 'selected' : ''}">${stop['순번']}</div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
                 });
+                const seqMarker = L.marker([stop.lat, stop.lng], { icon: seqIcon, interactive: false, zIndexOffset: 1000 }).addTo(map);
+                currentOrderMarkers.push(seqMarker);
+            });
 
-                const stopListHtml = sameRoute.map(s => `
-                    <div class="route-stop-item ${s['순번'] === item['순번'] ? 'active' : ''}">
-                        ${s['순번']}번째. ${s['승차정류장']} (${s['승차시간'].slice(0, 5)})
+            const stopListHtml = sameRoute.map(s => `
+                <div class="route-stop-item ${s['순번'] === item['순번'] ? 'active' : ''}">
+                    ${s['순번']}번째. ${s['승차정류장']} (${s['승차시간'] ? s['승차시간'].slice(0, 5) : ''})
+                </div>
+            `).join('');
+
+            const tagClass = routeType === '퇴근' ? 'badge-out' : 'badge-in';
+
+            // 상세 정보 팝업
+            const popupContent = `
+                <div class="custom-popup ${routeType === '퇴근' ? 'commute-out' : ''}">
+                    <h4>🚌 <span class="tag-badge ${tagClass}">${routeType}</span> ${item['노선명']}</h4>
+                    <div><span class="order-badge">정류장 순서: ${item['순번']}번째 (총 ${sameRoute.length}개 중)</span></div>
+                    <p><b>승차정류장:</b> ${item['승차정류장']}</p>
+                    <p><b>승차시간:</b> <span class="highlight">${item['승차시간'] || '정보 없음'}</span></p>
+                    <div class="time-box">
+                        <p><b>하차정류장:</b> ${item['하차정류장'] || '정보 없음'}${item['하차시간'] ? ` (${item['하차시간']})` : ''}</p>
+                        <p><b>소요시간:</b> <span class="highlight">${item['소요시간'] || (item['소요시간_분'] ? item['소요시간_분'] + '분' : '정보 없음')}</span></p>
                     </div>
-                `).join('');
+                    <div class="route-stop-list">
+                        <b>📍 노선 정류장 순서</b>
+                        ${stopListHtml}
+                    </div>
+                </div>
+            `;
+            marker.bindPopup(popupContent, { offset: [0, -10] }).openPopup();
 
-                // 상세 정보 팝업
-                const popupContent = `
-                    <div class="custom-popup">
-                        <h4>🚌 ${item['노선명']}</h4>
-                        <div><span class="order-badge">정류장 순서: ${item['순번']}번째 (총 ${sameRoute.length}개 중)</span></div>
-                        <p><b>승차정류장:</b> ${item['승차정류장']}</p>
-                        <p><b>승차시간:</b> <span class="highlight">${item['승차시간']}</span></p>
-                        <div class="time-box">
-                            <p><b>하차정류장:</b> ${item['하차정류장'] || '정보 없음'}${item['하차시간'] ? ` (${item['하차시간']})` : ''}</p>
-                            <p><b>소요시간:</b> <span class="highlight">${item['소요시간'] || (item['소요시간_분'] + '분') || '정보 없음'}</span></p>
+            if (zoomIn) {
+                map.setView([item.lat, item.lng], 14);
+            } else if (latlngs.length > 1) {
+                map.fitBounds(L.latLngBounds(latlngs).pad(0.2));
+            }
+        }
+
+        // 전체 마커 객체 생성
+        const allMarkerObjects = busData.map(item => {
+            const marker = L.marker([item.lat, item.lng]);
+            marker.on('click', function(e) {
+                L.DomEvent.stopPropagation(e);
+                selectStop(item, marker);
+            });
+            return { item, marker };
+        });
+
+        // 지역 원 및 범례 갱신
+        const legendDiv = document.getElementById('legend');
+        function updateRegionsAndLegend(currentItems) {
+            regionLayer.clearLayers();
+            legendDiv.innerHTML = '<div class="legend-title">📍 권역 범례</div>';
+
+            const currentRegions = {};
+            currentItems.forEach(item => {
+                const region = item['지역'] || '기타';
+                if (!currentRegions[region]) currentRegions[region] = [];
+                currentRegions[region].push(item);
+            });
+
+            const regionNames = Object.keys(currentRegions);
+            if (regionNames.length === 0) {
+                legendDiv.innerHTML += '<div style="color:#888; font-size:11px;">표시할 지역 없음</div>';
+                return;
+            }
+
+            regionNames.forEach(regionName => {
+                const points = currentRegions[regionName].map(item => [item.lat, item.lng]);
+                const bounds = L.latLngBounds(points);
+                const color = regionColors[regionName] || '#CCCCCC';
+                L.circle(bounds.getCenter(), {
+                    radius: 5000, color: color, fillColor: color, fillOpacity: 0.08, weight: 1.5,
+                    interactive: false
+                }).addTo(regionLayer);
+
+                legendDiv.innerHTML += `
+                    <div class="legend-item">
+                        <div class="legend-color" style="background:${color}"></div>
+                        <span>${regionName} <small style="color:#888;">(${currentRegions[regionName].length})</small></span>
+                    </div>`;
+            });
+        }
+
+        // 검색 결과 드롭다운 렌더링
+        function renderSearchResultsList(filteredList) {
+            const listEl = document.getElementById('searchResultsList');
+            const displayItems = filteredList.slice(0, 50);
+
+            let html = displayItems.map(({ item }) => {
+                const badgeClass = item._type === '퇴근' ? 'badge-out' : 'badge-in';
+                const timeStr = item['승차시간'] ? ` · ${item['승차시간'].slice(0, 5)}` : '';
+                const safeRoute = (item['노선명'] || '').replace(/'/g, "\'");
+                return `
+                    <div class="search-result-item" onclick="onSearchResultClick('${item._type}', '${safeRoute}', ${item['순번']})">
+                        <div class="result-title">
+                            <span class="tag-badge ${badgeClass}">${item._type}</span>
+                            <span>${item['승차정류장']}</span>
                         </div>
-                        <div class="route-stop-list">
-                            <b>📍 노선 정류장 순서</b>
-                            ${stopListHtml}
+                        <div class="result-sub">
+                            🚌 ${item['노선명']} (${item['순번']}번째 정류장${timeStr}) · ${item['지역'] || ''}
                         </div>
                     </div>
                 `;
-                marker.bindPopup(popupContent, { offset: [0, -10] }).openPopup();
+            }).join('');
 
-                // 클릭한 노선이 모두 보이도록 지도 범위 조정
-                map.fitBounds(L.latLngBounds(latlngs).pad(0.2));
+            if (filteredList.length > 50) {
+                html += `<div style="text-align:center; padding:6px; font-size:11px; color:#868e96;">외 ${filteredList.length - 50}개 결과가 더 있습니다.</div>`;
+            }
+
+            listEl.innerHTML = html;
+        }
+
+        // 검색 목록 항목 클릭
+        window.onSearchResultClick = function(type, routeName, seq) {
+            const target = allMarkerObjects.find(({ item }) =>
+                item._type === type && item['노선명'] === routeName && item['순번'] === seq
+            );
+            if (target) {
+                selectStop(target.item, target.marker, true);
+            }
+        };
+
+        // 필터 및 검색 적용
+        function applyFilter(autoFit = true) {
+            clearRouteOverlay();
+            markerLayer.clearLayers();
+
+            const query = currentKeyword.toLowerCase();
+
+            const filtered = allMarkerObjects.filter(({ item }) => {
+                if (currentMode !== '전체' && item._type !== currentMode) {
+                    return false;
+                }
+
+                if (query) {
+                    const boarding = (item['승차정류장'] || '').toLowerCase();
+                    const dropoff = (item['하차정류장'] || '').toLowerCase();
+                    const route = (item['노선명'] || '').toLowerCase();
+                    const region = (item['지역'] || '').toLowerCase();
+                    const stopName = (item['정류장명'] || '').toLowerCase();
+                    const matches = boarding.includes(query) ||
+                                    dropoff.includes(query) ||
+                                    route.includes(query) ||
+                                    region.includes(query) ||
+                                    stopName.includes(query);
+                    if (!matches) return false;
+                }
+
+                return true;
+            });
+
+            const boundsPoints = [];
+            filtered.forEach(({ marker, item }) => {
+                markerLayer.addLayer(marker);
+                boundsPoints.push([item.lat, item.lng]);
+            });
+
+            const statusEl = document.getElementById('searchStatus');
+            const resultsListEl = document.getElementById('searchResultsList');
+
+            if (filtered.length === 0) {
+                if (currentMode === '퇴근' && busData.every(d => d._type !== '퇴근')) {
+                    statusEl.innerHTML = `<span class="empty-notice">⚠️ 퇴근 노선 데이터 업데이트 예정입니다.</span>`;
+                } else {
+                    statusEl.innerHTML = `<span class="empty-notice">🔍 검색 결과가 없습니다.</span>`;
+                }
+                resultsListEl.style.display = 'none';
+            } else {
+                const modeLabel = currentMode === '전체' ? '전체' : currentMode;
+                const filterNote = query ? ` ('${currentKeyword}' 검색)` : '';
+                statusEl.innerHTML = `<span><b>${modeLabel}</b> 핀 <span class="badge-count">${filtered.length.toLocaleString()}개</span> 표시 중${filterNote}</span>`;
+
+                if (query) {
+                    renderSearchResultsList(filtered);
+                    resultsListEl.style.display = 'block';
+                } else {
+                    resultsListEl.style.display = 'none';
+                }
+
+                if (autoFit && boundsPoints.length > 0) {
+                    map.fitBounds(L.latLngBounds(boundsPoints).pad(0.1));
+                }
+            }
+
+            updateRegionsAndLegend(filtered.map(f => f.item));
+        }
+
+        // 출근/퇴근/전체 모드 전환
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === mode);
+            });
+            // 모드 버튼 클릭 시 검색창을 초기화하여 해당 모드의 전체 핀이 즉시 뜨도록 처리
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput.value) {
+                searchInput.value = '';
+                currentKeyword = '';
+                document.getElementById('searchClearBtn').style.display = 'none';
+                document.getElementById('searchResultsList').style.display = 'none';
+            }
+            applyFilter(true);
+        }
+
+        // 검색 처리
+        function handleSearch() {
+            currentKeyword = document.getElementById('searchInput').value.trim();
+            document.getElementById('searchClearBtn').style.display = currentKeyword ? 'flex' : 'none';
+            applyFilter(true);
+        }
+
+        // 검색어 초기화
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            currentKeyword = '';
+            document.getElementById('searchClearBtn').style.display = 'none';
+            document.getElementById('searchResultsList').style.display = 'none';
+            applyFilter(true);
+        }
+
+        // 이벤트 리스너 등록
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                setMode(this.dataset.mode);
             });
         });
 
-        // 모든 마커가 보이도록 초기 지도 범위 조정
-        if (allMarkers.length > 0) {
-            const group = L.featureGroup(allMarkers);
-            map.fitBounds(group.getBounds().pad(0.1));
-        }
+        let debounceTimer = null;
+        const searchInputEl = document.getElementById('searchInput');
+        searchInputEl.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                handleSearch();
+            }, 250);
+        });
 
-        // 빈 공간 클릭 시 선 지우기
+        searchInputEl.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                clearTimeout(debounceTimer);
+                handleSearch();
+            }
+        });
+
+        document.getElementById('searchBtn').addEventListener('click', function() {
+            clearTimeout(debounceTimer);
+            handleSearch();
+        });
+
+        document.getElementById('searchClearBtn').addEventListener('click', function() {
+            clearSearch();
+        });
+
+        // 지도 빈 공간 클릭 시 선 및 마커 하이라이트 지우기
         map.on('click', function() {
             clearRouteOverlay();
         });
+
+        // 패널 및 범례 내부 클릭/스크롤 시 지도 이벤트 방지
+        const searchPanelEl = document.getElementById('searchPanel');
+        if (searchPanelEl) {
+            L.DomEvent.disableClickPropagation(searchPanelEl);
+            L.DomEvent.disableScrollPropagation(searchPanelEl);
+        }
+        if (legendDiv) {
+            L.DomEvent.disableClickPropagation(legendDiv);
+            L.DomEvent.disableScrollPropagation(legendDiv);
+        }
+
+        // 초기 실행: '출근' 모드로 시작
+        applyFilter(true);
     </script>
 </body>
 </html>
