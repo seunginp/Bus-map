@@ -242,27 +242,38 @@
             color: #1864AB;
         }
 
-        /* 다중 노선 핀 (중복 경유지) */
-        .multi-pin {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #E03131;
+        /* 정류장 경유노선 수 네모 핀 (단일 노선 '1' 및 중복 경유 노선 '2+' 모두 네모로 표시) */
+        .stop-pin {
+            width: 22px;
+            height: 22px;
+            border-radius: 4px; /* 동그라미가 아닌 네모 형태 */
+            background: #FF6B6B;
             color: white;
             border: 2px solid white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.45);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 11px;
             font-weight: 800;
             cursor: pointer;
+            box-sizing: border-box;
         }
-        .multi-pin:hover {
-            filter: brightness(1.1);
+        .stop-pin.is-multi {
+            width: 25px;
+            height: 25px;
+            background: #C92A2A;
+            font-size: 12px;
+            box-shadow: 0 2px 7px rgba(0,0,0,0.5);
         }
-        .multi-pin.pin-out {
-            background: #1971C2;
+        .stop-pin:hover {
+            filter: brightness(1.12);
+        }
+        .stop-pin.pin-out {
+            background: #339AF0;
+        }
+        .stop-pin.pin-out.is-multi {
+            background: #1864AB;
         }
 
         /* 범례 */
@@ -573,7 +584,7 @@
 
         .highlight { color: #D63384; font-weight: bold; }
         
-        /* 순서 번호 마커 */
+        /* 선택된 노선의 정류장 순서 번호 마커 */
         .seq-marker {
             background: #E03131;
             color: white;
@@ -588,10 +599,17 @@
             font-size: 12px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.45);
             cursor: pointer;
+            box-sizing: border-box;
         }
         .seq-marker.selected {
             background: #1971C2 !important;
             box-shadow: 0 0 0 3px rgba(25, 113, 194, 0.35), 0 2px 6px rgba(0,0,0,0.5);
+        }
+        .seq-marker.sub-route-marker {
+            width: 22px;
+            height: 22px;
+            font-size: 11px;
+            opacity: 0.88;
         }
 
         @media (max-width: 600px) {
@@ -677,7 +695,7 @@
         const markerLayer = L.layerGroup().addTo(map);
         const routeLayer = L.layerGroup().addTo(map);
 
-        let currentRouteItems = [];
+        let currentFilteredGroups = [];
         let currentOrderMarkers = [];
         let currentActiveStopGroup = null;
         let currentActiveRouteIdx = 0;
@@ -713,27 +731,37 @@
             return '출근';
         }
 
+        // 숨겨졌던 전체(또는 현재 검색 필터된) 정류장 핀들을 지도에 다시 복원
+        function restoreFilteredMarkers() {
+            markerLayer.clearLayers();
+            currentFilteredGroups.forEach(group => {
+                markerLayer.addLayer(group.marker);
+            });
+        }
+
         // 오버레이 및 안내창 모두 정리
-        function clearRouteOverlay() {
+        function clearRouteOverlay(restorePins = true) {
             if (currentPopup) {
                 map.removeLayer(currentPopup);
                 currentPopup = null;
             }
             routeLayer.clearLayers();
-            currentRouteItems = [];
             currentOrderMarkers.forEach(m => map.removeLayer(m));
             currentOrderMarkers = [];
             currentActiveStopGroup = null;
             currentActiveRouteIdx = 0;
+            if (restorePins) {
+                restoreFilteredMarkers();
+            }
         }
 
-        // 사용자가 안내창의 X 버튼을 눌렀을 때만 닫히도록 처리
+        // 사용자가 안내창의 X 버튼을 눌렀을 때 닫히고 나머지 정류장 핀들이 다시 나타나도록 처리
         window.closeRoutePopup = function(e) {
             if (e) {
                 e.stopPropagation();
                 e.preventDefault();
             }
-            clearRouteOverlay();
+            clearRouteOverlay(true);
         };
 
         // 1. 노선별 그룹화 및 2. 정류장 위치별(중복 방지) 그룹화
@@ -761,22 +789,29 @@
             stopGroups[stopKey].routes.push(item);
         });
 
-        // 위치 그룹별 마커 생성 (bindPopup을 사용하지 않아 토글 닫힘 및 remove 경합 원천 차단)
+        // 위치 그룹별 마커 생성 (모두 네모 형태로 경유 노선 수 1, 2, 3... 표시)
         Object.values(stopGroups).forEach(group => {
-            let marker;
-            if (group.routes.length > 1) {
-                const multiIcon = L.divIcon({
-                    className: '',
-                    html: `<div class="multi-pin ${group.type === '퇴근' ? 'pin-out' : ''}" title="${group.stopName} (${group.routes.length}개 노선 경유)">
-                             <span>${group.routes.length}</span>
-                           </div>`,
-                    iconSize: [26, 26],
-                    iconAnchor: [13, 13]
-                });
-                marker = L.marker([group.lat, group.lng], { icon: multiIcon, zIndexOffset: 500 });
-            } else {
-                marker = L.marker([group.lat, group.lng], { title: `${group.stopName} (${group.routes[0]['노선명']})` });
-            }
+            const count = group.routes.length;
+            const isMulti = count > 1;
+            const size = isMulti ? 25 : 22;
+            const anchor = Math.round(size / 2);
+            const titleText = isMulti
+                ? `${group.stopName} (${count}개 노선 경유)`
+                : `${group.stopName} (${group.routes[0]['노선명']})`;
+
+            const squareIcon = L.divIcon({
+                className: '',
+                html: `<div class="stop-pin ${isMulti ? 'is-multi' : ''} ${group.type === '퇴근' ? 'pin-out' : ''}" title="${titleText}">
+                         <span>${count}</span>
+                       </div>`,
+                iconSize: [size, size],
+                iconAnchor: [anchor, anchor]
+            });
+
+            const marker = L.marker([group.lat, group.lng], {
+                icon: squareIcon,
+                zIndexOffset: isMulti ? 500 : 200
+            });
 
             marker.on('click', function(e) {
                 L.DomEvent.stopPropagation(e);
@@ -791,7 +826,6 @@
 
         // 선분 (x1,y1)-(x2,y2)와 직사각형 rect 사이의 최소 거리 계산 (교차 시 0 반환)
         function segmentToRectDistance(x1, y1, x2, y2, rect) {
-            // 샘플링 포인트(20등분)와 직사각형 사이의 최소 거리 측정
             let minDist = Infinity;
             const steps = 20;
             for (let i = 0; i <= steps; i++) {
@@ -823,7 +857,6 @@
             const px = pinPt.x;
             const py = pinPt.y;
 
-            // 노선의 모든 선분과 정류장 픽셀 좌표 수집
             const segments = [];
             const otherStops = [];
 
@@ -846,7 +879,6 @@
                 }
             });
 
-            // 4방향 후보 직사각형 정의 (CSS transform과 100% 동일한 픽셀 영역)
             const candidates = [
                 {
                     dir: 'left',
@@ -876,7 +908,6 @@
             candidates.forEach(c => {
                 let score = c.baseBias;
 
-                // 1. 노선 선분 가림 페널티
                 segments.forEach(seg => {
                     const dist = segmentToRectDistance(seg.x1, seg.y1, seg.x2, seg.y2, c.rect);
                     if (dist === 0) {
@@ -886,7 +917,6 @@
                     }
                 });
 
-                // 2. 다른 정류장 핀 가림 페널티
                 otherStops.forEach(pt => {
                     const dx = Math.max(c.rect.left - pt.x, 0, pt.x - c.rect.right);
                     const dy = Math.max(c.rect.top - pt.y, 0, pt.y - c.rect.bottom);
@@ -898,7 +928,6 @@
                     }
                 });
 
-                // 3. 안전 화면 영역(우측 검색창 제외 영역)을 벗어나는 경우 필요한 panBy 계산
                 let panX = 0;
                 let panY = 0;
                 if (c.rect.left < safeLeft) panX = c.rect.left - safeLeft;
@@ -910,7 +939,6 @@
                 const panDist = Math.hypot(panX, panY);
                 score += panDist * 1.2;
 
-                // 4. 만약 panBy를 수행했을 때 다른 정류장이 화면 밖이나 검색창 뒤로 밀려나는지 확인
                 otherStops.forEach(pt => {
                     const shiftedX = pt.x - panX;
                     const shiftedY = pt.y - panY;
@@ -931,7 +959,7 @@
             return bestCandidate;
         }
 
-        // 선택된 노선(routeIdx) 기준으로 선 스타일 및 순번 마커(1번, 2번...) 그리기
+        // 선택된 노선(activeRouteIdx)의 정류장 및 경로만 지도에 표시 (나머지 정류장 핀은 숨김 처리됨)
         function renderRouteOverlay(stopGroup, activeRouteIdx) {
             routeLayer.clearLayers();
             currentOrderMarkers.forEach(m => map.removeLayer(m));
@@ -939,7 +967,6 @@
 
             if (!stopGroup || !stopGroup.routes || stopGroup.routes.length === 0) return;
 
-            // 1. 비선택 노선 먼저 그리고, 선택된 노선을 가장 위에 선명하게 그리기 (흰색 외곽선 + 굵은 실선 + 내부 방향 점선)
             const indices = stopGroup.routes.map((_, idx) => idx).sort((a, b) => (a === activeRouteIdx ? 1 : b === activeRouteIdx ? -1 : 0));
 
             indices.forEach(idx => {
@@ -947,12 +974,11 @@
                 const routeKey = `${r._type}__${r['노선명']}`;
                 const sameRoute = (routeGroups[routeKey] || [r]).slice().sort((a, b) => a['순번'] - b['순번']);
                 const latlngs = sameRoute.map(d => [d.lat, d.lng]);
+                const color = routeColors[idx % routeColors.length];
+                const isSelected = (idx === activeRouteIdx);
 
                 if (latlngs.length > 1) {
-                    const color = routeColors[idx % routeColors.length];
-                    const isSelected = (idx === activeRouteIdx);
-
-                    // 흰색 외곽선(Halo)으로 배경 지도 도로 색상과 완벽히 분리
+                    // 흰색 외곽선(Halo)
                     L.polyline(latlngs, {
                         pane: 'routePane',
                         color: '#FFFFFF',
@@ -974,7 +1000,7 @@
                         interactive: false
                     }).addTo(routeLayer);
 
-                    // 선택된 노선은 내부에 흰색 점선을 추가해 버스 노선임을 한눈에 식별 가능하게 표시
+                    // 선택된 노선은 내부에 흰색 방향 점선 추가
                     if (isSelected) {
                         L.polyline(latlngs, {
                             pane: 'routePane',
@@ -990,18 +1016,22 @@
                 }
             });
 
-            // 2. 선택된 노선의 정류장 순번 배지(1, 2, 3...) 표시
-            const selectedItem = stopGroup.routes[activeRouteIdx] || stopGroup.routes[0];
-            const routeKey = `${selectedItem._type}__${selectedItem['노선명']}`;
-            const sameRoute = (routeGroups[routeKey] || [selectedItem]).slice().sort((a, b) => a['순번'] - b['순번']);
-            const routeColor = routeColors[activeRouteIdx % routeColors.length];
+            // 활성 노선의 정류장(및 중복 경유 노선의 정류장)만 지도에 마커로 표시
+            const drawnStopKeys = new Set();
+            const activeItem = stopGroup.routes[activeRouteIdx] || stopGroup.routes[0];
+            const activeKey = `${activeItem._type}__${activeItem['노선명']}`;
+            const activeStops = (routeGroups[activeKey] || [activeItem]).slice().sort((a, b) => a['순번'] - b['순번']);
+            const activeColor = routeColors[activeRouteIdx % routeColors.length];
 
-            sameRoute.forEach(stop => {
+            // 1. 현재 선택된(탭 활성화된) 노선의 정류장 순번 마커 표시
+            activeStops.forEach(stop => {
+                const posKey = `${stop.lat.toFixed(5)}_${stop.lng.toFixed(5)}`;
+                drawnStopKeys.add(posKey);
                 const isCurrentStop = (stop.lat.toFixed(5) === stopGroup.lat.toFixed(5) && 
                                        stop.lng.toFixed(5) === stopGroup.lng.toFixed(5));
                 const seqIcon = L.divIcon({
                     className: '',
-                    html: `<div class="seq-marker ${isCurrentStop ? 'selected' : ''}" style="background: ${isCurrentStop ? '#1971C2' : routeColor}">${stop['순번']}</div>`,
+                    html: `<div class="seq-marker ${isCurrentStop ? 'selected' : ''}" style="background: ${isCurrentStop ? '#1971C2' : activeColor}" title="${stop['노선명']} - ${stop['순번']}번 ${stop['승차정류장']}">${stop['순번']}</div>`,
                     iconSize: [26, 26],
                     iconAnchor: [13, 13]
                 });
@@ -1011,7 +1041,7 @@
                     const targetKey = `${stop._type}__${stop.lat.toFixed(5)}__${stop.lng.toFixed(5)}`;
                     const targetGroup = stopGroups[targetKey];
                     if (targetGroup) {
-                        const rIdx = targetGroup.routes.findIndex(r => r['노선명'] === selectedItem['노선명']);
+                        const rIdx = targetGroup.routes.findIndex(r => r['노선명'] === activeItem['노선명']);
                         openStopPopup(targetGroup, false, rIdx !== -1 ? rIdx : 0);
                     }
                 });
@@ -1019,6 +1049,41 @@
                     L.DomEvent.stopPropagation(e);
                 });
                 currentOrderMarkers.push(seqMarker);
+            });
+
+            // 2. 중복 노선 정류장을 클릭한 경우, 함께 그려진 다른 경유 노선의 정류장들도 표시
+            stopGroup.routes.forEach((r, idx) => {
+                if (idx === activeRouteIdx) return;
+                const rk = `${r._type}__${r['노선명']}`;
+                const subStops = (routeGroups[rk] || [r]).slice().sort((a, b) => a['순번'] - b['순번']);
+                const subColor = routeColors[idx % routeColors.length];
+
+                subStops.forEach(stop => {
+                    const posKey = `${stop.lat.toFixed(5)}_${stop.lng.toFixed(5)}`;
+                    if (drawnStopKeys.has(posKey)) return;
+                    drawnStopKeys.add(posKey);
+
+                    const subIcon = L.divIcon({
+                        className: '',
+                        html: `<div class="seq-marker sub-route-marker" style="background: ${subColor}" title="${stop['노선명']} - ${stop['순번']}번 ${stop['승차정류장']}">${stop['순번']}</div>`,
+                        iconSize: [22, 22],
+                        iconAnchor: [11, 11]
+                    });
+                    const subMarker = L.marker([stop.lat, stop.lng], { icon: subIcon, interactive: true, zIndexOffset: 1500 }).addTo(map);
+                    subMarker.on('click', function(e) {
+                        L.DomEvent.stopPropagation(e);
+                        const targetKey = `${stop._type}__${stop.lat.toFixed(5)}__${stop.lng.toFixed(5)}`;
+                        const targetGroup = stopGroups[targetKey];
+                        if (targetGroup) {
+                            const rIdx = targetGroup.routes.findIndex(rt => rt['노선명'] === r['노선명']);
+                            openStopPopup(targetGroup, false, rIdx !== -1 ? rIdx : 0);
+                        }
+                    });
+                    subMarker.on('dblclick', function(e) {
+                        L.DomEvent.stopPropagation(e);
+                    });
+                    currentOrderMarkers.push(subMarker);
+                });
             });
         }
 
@@ -1105,7 +1170,7 @@
                         <h4>🚏 <span class="tag-badge ${tagClass}">${stopGroup.type}</span> ${stopGroup.stopName}</h4>
                         <div class="popup-header-right">
                             <span class="route-count-badge">${isMulti ? `경유 노선 ${stopGroup.routes.length}개` : '단일 노선'}</span>
-                            <button type="button" class="popup-close-btn" onclick="window.closeRoutePopup(event)" title="닫기">✕</button>
+                            <button type="button" class="popup-close-btn" onclick="window.closeRoutePopup(event)" title="닫기 (전체 정류장 다시 보기)">✕</button>
                         </div>
                     </div>
                     ${tabsHtml}
@@ -1114,13 +1179,17 @@
             `;
         }
 
-        // 정류장 안내창(Popup) 열기 및 중복 노선 동시 표시
+        // 정류장 안내창(Popup) 열기 및 선택 노선 외 나머지 정류장 숨김 처리
         function openStopPopup(stopGroup, zoomIn = false, initialRouteIdx = 0) {
-            // 한글 입력기(IME) 포커스 해제 등으로 예약된 검색 디바운스 타이머가 뒤늦게 실행되어 경로선을 지우는 버그 원천 차단
             clearTimeout(debounceTimer);
             map.stop();
 
-            clearRouteOverlay();
+            // 기존 오버레이 정리 (새로운 노선을 띄울 것이므로 전체 핀 복원은 생략)
+            clearRouteOverlay(false);
+
+            // ★ 선택된 노선 제외하고 나머지 정류장은 지도에서 잠시 안 보이도록 markerLayer 비우기
+            markerLayer.clearLayers();
+
             currentActiveStopGroup = stopGroup;
             currentActiveRouteIdx = initialRouteIdx;
 
@@ -1131,7 +1200,7 @@
                 sameRoute.forEach(d => allBoundsPoints.push([d.lat, d.lng]));
             });
 
-            // 1. 먼저 노선 전체가 우측 검색 패널을 피해 화면에 잘 들어오도록 동기식(animate: false)으로 범위 맞춤
+            // 1. 먼저 노선 전체가 우측 검색 패널을 피해 화면에 잘 들어오도록 범위 맞춤
             const mapW = map.getSize().x;
             const isMobile = mapW <= 650;
             if (allBoundsPoints.length > 1) {
@@ -1145,7 +1214,7 @@
                 map.setView([stopGroup.lat, stopGroup.lng], 15, { animate: false });
             }
 
-            // 2. 노선 경로선 및 정류장 순번 배지(1, 2...) 렌더링
+            // 2. 선택된 노선 경로선 및 해당 노선의 정류장 순번 마커만 지도에 렌더링
             renderRouteOverlay(stopGroup, initialRouteIdx);
 
             // 3. 안내창 생성 및 오픈
@@ -1312,7 +1381,7 @@
 
         // 필터 및 검색 적용
         function applyFilter(autoFit = true, fromExplicitSearch = false) {
-            clearRouteOverlay();
+            clearRouteOverlay(false);
             markerLayer.clearLayers();
 
             const query = currentKeyword.toLowerCase();
@@ -1337,6 +1406,8 @@
 
                 return true;
             });
+
+            currentFilteredGroups = filtered;
 
             const boundsPoints = [];
             filtered.forEach(group => {
@@ -1441,7 +1512,6 @@
         searchInputEl.addEventListener('input', function() {
             const val = this.value.trim();
             document.getElementById('searchClearBtn').style.display = val ? 'flex' : 'none';
-            // 한글 IME 포커스 해제(blur) 시 동일한 값으로 input 이벤트가 재발생하여 열린 안내창/경로선을 지우는 현상 방지
             if (val === currentKeyword) return;
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
