@@ -173,10 +173,30 @@
         /* 검색 결과 리스트 드롭다운 */
         .search-results-list {
             margin-top: 10px;
-            max-height: 220px;
+            max-height: 230px;
             overflow-y: auto;
             border-top: 1px solid #e9ecef;
             padding-top: 6px;
+        }
+        .route-highlight-card {
+            background: #e7f5ff;
+            border: 1px solid #74c0fc;
+            border-radius: 8px;
+            padding: 9px 11px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .route-highlight-card:hover {
+            background: #d0ebff;
+            border-color: #339af0;
+        }
+        .result-sub-stops {
+            font-size: 11px;
+            color: #1971c2;
+            margin-top: 4px;
+            line-height: 1.4;
+            word-break: keep-all;
         }
         .search-result-item {
             padding: 8px 10px;
@@ -187,7 +207,7 @@
             transition: background 0.15s;
         }
         .search-result-item:hover {
-            background: #e7f5ff;
+            background: #f1f3f5;
         }
         .result-title {
             font-weight: 600;
@@ -256,8 +276,8 @@
         .custom-popup {
             font-size: 13px;
             line-height: 1.5;
-            min-width: 270px;
-            max-width: 340px;
+            min-width: 280px;
+            max-width: 350px;
         }
         .popup-title-bar {
             display: flex;
@@ -289,109 +309,147 @@
             border-radius: 10px;
             white-space: nowrap;
         }
-        .route-select-guide {
+
+        /* 팝업 내 노선 전환 탭 */
+        .route-tabs-container {
+            margin-bottom: 8px;
+        }
+        .tabs-label {
             font-size: 11px;
             color: #868e96;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
-        .multi-route-cards {
-            max-height: 165px;
-            overflow-y: auto;
+        .route-tab-pills {
             display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 8px;
-            padding-right: 2px;
+            flex-wrap: wrap;
+            gap: 5px;
         }
-        .route-card {
+        .route-tab-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f1f3f5;
+            border: 1px solid #ced4da;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            color: #495057;
+            transition: all 0.15s;
+        }
+        .route-tab-pill:hover {
+            background: #e9ecef;
+        }
+        .route-tab-pill.active {
+            background: #fff;
+            border-color: var(--tab-color, #1971c2);
+            color: #212529;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+            font-weight: bold;
+        }
+        .tab-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .tab-seq {
+            background: #e9ecef;
+            border-radius: 3px;
+            padding: 0 3px;
+            font-size: 10px;
+        }
+
+        /* 팝업 내 전체 승하차 경로 박스 */
+        .route-sequence-box {
             background: #f8f9fa;
             border: 1px solid #e9ecef;
-            border-left: 4px solid var(--route-color, #adb5bd);
-            border-radius: 6px;
-            padding: 7px 10px;
-            cursor: pointer;
-            transition: all 0.15s ease;
+            border-radius: 8px;
+            padding: 8px 10px;
         }
-        .route-card:hover {
-            background: #f1f3f5;
-            border-color: #ced4da;
-        }
-        .route-card.active {
-            background: #fff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-            border-color: #adb5bd;
-            border-left: 5px solid var(--route-color, #339af0);
-        }
-        .route-card-header {
+        .sequence-header {
+            font-size: 12px;
+            font-weight: bold;
+            color: #212529;
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 13px;
+            margin-bottom: 8px;
+            border-bottom: 1px dashed #dee2e6;
+            padding-bottom: 5px;
         }
-        .route-color-dot {
-            width: 10px;
-            height: 10px;
+        .sequence-list {
+            max-height: 155px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding-right: 2px;
+        }
+        .sequence-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            padding: 4px 6px;
+            border-radius: 4px;
+            background: white;
+            border: 1px solid #f1f3f5;
+        }
+        .sequence-item.is-current {
+            background: #e7f5ff;
+            border-color: #74c0fc;
+            font-weight: bold;
+            color: #1864ab;
+        }
+        .seq-num-badge {
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 800;
             flex-shrink: 0;
         }
-        .route-name {
+        .seq-stop-name {
             flex: 1;
-            color: #212529;
-            font-size: 13px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .route-seq-badge {
+        .seq-time {
             font-size: 11px;
-            background: #e9ecef;
-            color: #495057;
-            padding: 1px 6px;
-            border-radius: 4px;
-            font-weight: 600;
+            color: #868e96;
             white-space: nowrap;
         }
-        .route-card-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: #495057;
-            margin-top: 3px;
-            padding-left: 16px;
-        }
-        .route-stop-list {
-            margin-top: 8px;
-            padding-top: 6px;
-            border-top: 1px dashed #ddd;
-            max-height: 120px;
-            overflow-y: auto;
-            font-size: 12px;
-        }
-        .active-route-name {
-            font-size: 11px;
-            color: #495057;
-            margin-bottom: 4px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .route-stop-item {
-            padding: 2px 4px;
-            border-radius: 3px;
-            color: #555;
-        }
-        .route-stop-item.active {
-            background: #FFE3E3;
-            color: #C92A2A;
+        .is-current .seq-time {
+            color: #1971c2;
             font-weight: bold;
         }
-        .badge-cur {
+        .current-tag {
             font-size: 10px;
-            background: #ff6b6b;
+            background: #1971c2;
             color: white;
             padding: 1px 4px;
             border-radius: 3px;
-            margin-left: 4px;
+            white-space: nowrap;
+        }
+        .dropoff-item {
+            background: #fff9db;
+            border-color: #ffe066;
+        }
+        .dropoff-badge {
+            background: transparent;
+            font-size: 12px;
+        }
+        .duration-tag {
+            font-size: 10px;
+            color: #d63384;
+            font-weight: bold;
+            white-space: nowrap;
         }
 
         .highlight { color: #D63384; font-weight: bold; }
@@ -486,6 +544,8 @@
         let currentPolylines = [];
         let currentOrderMarkers = [];
         let currentActiveStopGroup = null;
+        let currentActiveRouteIdx = 0;
+        let currentPopup = null;
 
         const routeGroups = {};
         const stopGroups = {};
@@ -522,6 +582,8 @@
             currentOrderMarkers.forEach(m => map.removeLayer(m));
             currentOrderMarkers = [];
             currentActiveStopGroup = null;
+            currentActiveRouteIdx = 0;
+            currentPopup = null;
         }
 
         // 1. 노선별 그룹화 및 2. 정류장 위치별(중복 방지) 그룹화
@@ -549,7 +611,7 @@
             stopGroups[stopKey].routes.push(item);
         });
 
-        // 위치 그룹별 마커 생성 (중복 위치 핀 겹침 문제 완전 해결)
+        // 위치 그룹별 마커 생성 (중복 위치 핀 겹침 문제 해결)
         Object.values(stopGroups).forEach(group => {
             let marker;
             if (group.routes.length > 1) {
@@ -576,10 +638,92 @@
             group.marker = marker;
         });
 
-        // 팝업 내부에서 노선 카드 클릭 시 해당 노선 강조
-        window.onRouteCardClick = function(idx) {
-            highlightRoute(idx);
+        // 팝업 내부에서 탭 클릭 시 노선 전환
+        window.onRouteTabClick = function(idx) {
+            if (currentActiveStopGroup) {
+                currentActiveRouteIdx = idx;
+                if (currentPopup) {
+                    currentPopup.setContent(generatePopupHtml(currentActiveStopGroup, idx));
+                }
+                highlightRoute(idx);
+            }
         };
+
+        // 팝업 HTML 생성 함수 (노선의 1번, 2번 등 모든 정류장 순서 완벽 표시)
+        function generatePopupHtml(stopGroup, activeRouteIdx = 0) {
+            const isMulti = stopGroup.routes.length > 1;
+            const tagClass = stopGroup.type === '퇴근' ? 'badge-out' : 'badge-in';
+            const activeRouteItem = stopGroup.routes[activeRouteIdx] || stopGroup.routes[0];
+            const activeRouteKey = `${activeRouteItem._type}__${activeRouteItem['노선명']}`;
+            const allStopsOfRoute = (routeGroups[activeRouteKey] || [activeRouteItem]).slice().sort((a, b) => a['순번'] - b['순번']);
+            const activeColor = routeColors[activeRouteIdx % routeColors.length];
+
+            // 경유 노선 탭 (2개 이상 노선이 경유할 때)
+            let tabsHtml = '';
+            if (isMulti) {
+                tabsHtml = `
+                    <div class="route-tabs-container">
+                        <div class="tabs-label">경유 노선 선택 (${stopGroup.routes.length}개):</div>
+                        <div class="route-tab-pills">
+                            ${stopGroup.routes.map((r, idx) => {
+                                const isCur = idx === activeRouteIdx;
+                                const c = routeColors[idx % routeColors.length];
+                                return `
+                                    <button type="button" class="route-tab-pill ${isCur ? 'active' : ''}" 
+                                        onclick="window.onRouteTabClick(${idx})"
+                                        style="--tab-color: ${c};">
+                                        <span class="tab-dot" style="background:${c}"></span>
+                                        <b>${r['노선명']}</b>
+                                        <span class="tab-seq">${r['순번']}번</span>
+                                    </button>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 노선의 전체 승차 정류장 순번 (1번, 2번, ..., 하차) 목록 직접 생성
+            const stopsListHtml = `
+                <div class="route-sequence-box">
+                    <div class="sequence-header">
+                        <span class="route-color-dot" style="background:${activeColor}"></span>
+                        <b>🚌 ${activeRouteItem['노선명']}</b> 전체 정류장 (${allStopsOfRoute.length}개 승차)
+                    </div>
+                    <div class="sequence-list">
+                        ${allStopsOfRoute.map(s => {
+                            const isHere = (s.lat.toFixed(5) === stopGroup.lat.toFixed(5) && 
+                                            s.lng.toFixed(5) === stopGroup.lng.toFixed(5));
+                            return `
+                                <div class="sequence-item ${isHere ? 'is-current' : ''}">
+                                    <span class="seq-num-badge" style="background:${isHere ? '#1971C2' : activeColor}">${s['순번']}</span>
+                                    <span class="seq-stop-name">${s['승차정류장']}</span>
+                                    <span class="seq-time">${s['승차시간'] ? s['승차시간'].slice(0, 5) : '-'}</span>
+                                    ${isHere ? '<span class="current-tag">현재 위치</span>' : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                        <div class="sequence-item dropoff-item">
+                            <span class="seq-num-badge dropoff-badge">🏁</span>
+                            <span class="seq-stop-name">${activeRouteItem['하차정류장'] || '회사[이천캠퍼스]'}</span>
+                            <span class="seq-time">${activeRouteItem['하차시간'] ? activeRouteItem['하차시간'].slice(0, 5) : '도착'}</span>
+                            <span class="duration-tag">${activeRouteItem['소요시간'] || (activeRouteItem['소요시간_분'] ? activeRouteItem['소요시간_분']+'분' : '')}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return `
+                <div class="custom-popup ${stopGroup.type === '퇴근' ? 'commute-out' : ''}">
+                    <div class="popup-title-bar">
+                        <h4>🚏 <span class="tag-badge ${tagClass}">${stopGroup.type}</span> ${stopGroup.stopName}</h4>
+                        <span class="route-count-badge">${isMulti ? `경유 노선 ${stopGroup.routes.length}개` : '단일 노선'}</span>
+                    </div>
+                    ${tabsHtml}
+                    ${stopsListHtml}
+                </div>
+            `;
+        }
 
         // 특정 노선의 상세 순번 및 강조 표시
         function highlightRoute(routeIdx) {
@@ -598,7 +742,7 @@
                 }
             });
 
-            // 2. 정류장 순번 번호 마커 갱신
+            // 2. 정류장 순번 번호 마커 갱신 (1번, 2번 등 순번 마커 지도에 표시)
             currentOrderMarkers.forEach(m => map.removeLayer(m));
             currentOrderMarkers = [];
 
@@ -616,34 +760,8 @@
                     iconSize: [24, 24],
                     iconAnchor: [12, 12]
                 });
-                const seqMarker = L.marker([stop.lat, stop.lng], { icon: seqIcon, interactive: false, zIndexOffset: 1000 }).addTo(map);
+                const seqMarker = L.marker([stop.lat, stop.lng], { icon: seqIcon, interactive: false, zIndexOffset: 2000 }).addTo(map);
                 currentOrderMarkers.push(seqMarker);
-            });
-
-            // 3. 팝업 내 하단 정류장 순서 리스트 갱신
-            const stopListEl = document.getElementById('activeRouteStopList');
-            if (stopListEl) {
-                stopListEl.innerHTML = `
-                    <div class="active-route-name">
-                        <span class="route-color-dot" style="background:${routeColor}"></span>
-                        <b>${selectedItem['노선명']}</b> 전체 정류장 순서 (${sameRoute.length}개)
-                    </div>
-                    ${sameRoute.map(s => {
-                        const isCur = (s.lat.toFixed(5) === currentActiveStopGroup.lat.toFixed(5) && 
-                                       s.lng.toFixed(5) === currentActiveStopGroup.lng.toFixed(5));
-                        return `
-                            <div class="route-stop-item ${isCur ? 'active' : ''}">
-                                ${s['순번']}번째. ${s['승차정류장']} (${s['승차시간'] ? s['승차시간'].slice(0, 5) : '-'})
-                                ${isCur ? '<span class="badge-cur">현재 정류장</span>' : ''}
-                            </div>
-                        `;
-                    }).join('')}
-                `;
-            }
-
-            // 4. 팝업 내 노선 카드 active 클래스 변경
-            document.querySelectorAll('.route-card').forEach((card, idx) => {
-                card.classList.toggle('active', idx === routeIdx);
             });
         }
 
@@ -651,9 +769,9 @@
         function openStopPopup(stopGroup, zoomIn = false, initialRouteIdx = 0) {
             clearRouteOverlay();
             currentActiveStopGroup = stopGroup;
+            currentActiveRouteIdx = initialRouteIdx;
 
             const allBoundsPoints = [];
-            const isMulti = stopGroup.routes.length > 1;
 
             // 중복되는 노선들의 연결선을 동시에 지도에 표시 (각각 다른 색상)
             stopGroup.routes.forEach((r, idx) => {
@@ -675,42 +793,10 @@
                 }
             });
 
-            const tagClass = stopGroup.type === '퇴근' ? 'badge-out' : 'badge-in';
-
-            const popupContent = `
-                <div class="custom-popup ${stopGroup.type === '퇴근' ? 'commute-out' : ''}">
-                    <div class="popup-title-bar">
-                        <h4>🚏 <span class="tag-badge ${tagClass}">${stopGroup.type}</span> ${stopGroup.stopName}</h4>
-                        <span class="route-count-badge">${isMulti ? `경유 노선 ${stopGroup.routes.length}개` : '단일 노선'}</span>
-                    </div>
-                    ${isMulti ? '<div class="route-select-guide">📌 노선을 클릭하면 해당 노선의 상세 순번이 지도에 강조됩니다.</div>' : ''}
-                    
-                    <div class="multi-route-cards">
-                        ${stopGroup.routes.map((r, idx) => {
-                            const color = routeColors[idx % routeColors.length];
-                            const isSelected = (idx === initialRouteIdx);
-                            return `
-                                <div class="route-card ${isSelected ? 'active' : ''}" onclick="window.onRouteCardClick(${idx})" style="--route-color: ${color}">
-                                    <div class="route-card-header">
-                                        <span class="route-color-dot" style="background: ${color}"></span>
-                                        <span class="route-name"><b>${r['노선명']}</b></span>
-                                        <span class="route-seq-badge">${r['순번']}번째</span>
-                                    </div>
-                                    <div class="route-card-info">
-                                        <div>승차: <b class="highlight">${r['승차시간'] ? r['승차시간'].slice(0, 5) : '정보없음'}</b></div>
-                                        <div>하차: ${r['하차시간'] || '-'} (${r['소요시간'] || (r['소요시간_분'] ? r['소요시간_분'] + '분' : '-')})</div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-
-                    <div class="route-stop-list" id="activeRouteStopList"></div>
-                </div>
-            `;
+            const popupContent = generatePopupHtml(stopGroup, initialRouteIdx);
 
             // closeOnClick: false -> 사용자가 'X' 버튼을 누를 때까지 팝업이 닫히지 않고 항상 유지됨
-            const popup = L.popup({
+            currentPopup = L.popup({
                 closeOnClick: false,
                 autoClose: true,
                 offset: [0, -10],
@@ -718,13 +804,13 @@
             }).setContent(popupContent);
 
             // 사용자가 X 버튼을 눌러 팝업을 닫았을 때 선 및 순번 마커 정리
-            popup.on('remove', function() {
+            currentPopup.on('remove', function() {
                 clearRouteOverlay();
             });
 
-            stopGroup.marker.bindPopup(popup).openPopup();
+            stopGroup.marker.bindPopup(currentPopup).openPopup();
 
-            // 선택된 노선의 순번 마커 및 상세 리스트 표시
+            // 선택된 노선의 순번 마커(1번, 2번...) 표시
             highlightRoute(initialRouteIdx);
 
             if (zoomIn) {
@@ -771,14 +857,46 @@
         }
 
         // 검색 결과 드롭다운 렌더링
-        function renderSearchResultsList(filteredGroups) {
+        function renderSearchResultsList(filteredGroups, query) {
             const listEl = document.getElementById('searchResultsList');
-            const displayItems = filteredGroups.slice(0, 50);
 
-            let html = displayItems.map(group => {
+            // 1. 노선명 검색 시 상단에 노선 전체 바로가기 카드 표시
+            let routeHeaderHtml = '';
+            if (query) {
+                const matchedRoutes = Object.keys(routeGroups).filter(rk => {
+                    const rname = rk.split('__')[1] || '';
+                    return rname.toLowerCase().includes(query.toLowerCase());
+                });
+
+                if (matchedRoutes.length > 0) {
+                    routeHeaderHtml = matchedRoutes.slice(0, 3).map(rk => {
+                        const stops = routeGroups[rk].slice().sort((a,b) => a['순번'] - b['순번']);
+                        const type = stops[0]._type;
+                        const rname = stops[0]['노선명'];
+                        const badgeClass = type === '퇴근' ? 'badge-out' : 'badge-in';
+                        const stopSummary = stops.map(s => `${s['순번']}번.${s['승차정류장']}`).join(' → ');
+                        const safeRk = rk.replace(/'/g, "\\'");
+                        return `
+                            <div class="route-highlight-card" onclick="window.onRouteSelectFromSearch('${safeRk}')">
+                                <div class="result-title">
+                                    <span class="tag-badge ${badgeClass}">${type}</span>
+                                    <b>🚌 ${rname}</b>
+                                    <span class="route-count-badge">승차 ${stops.length}개 정류장</span>
+                                </div>
+                                <div class="result-sub-stops">
+                                    ${stopSummary} → 🏁 회사
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            const displayItems = filteredGroups.slice(0, 50);
+            const stopsHtml = displayItems.map(group => {
                 const badgeClass = group.type === '퇴근' ? 'badge-out' : 'badge-in';
                 const routeCountStr = group.routes.length > 1 ? ` · <span style="color:#1c7ed6; font-weight:bold;">${group.routes.length}개 노선 경유</span>` : '';
-                const routeNames = group.routes.map(r => r['노선명']).slice(0, 3).join(', ') + (group.routes.length > 3 ? ' 외' : '');
+                const routeNames = group.routes.map(r => `${r['노선명']}(${r['순번']}번)`).join(', ');
                 const safeKey = group.key.replace(/'/g, "\\'");
                 return `
                     <div class="search-result-item" onclick="window.onSearchResultClick('${safeKey}')">
@@ -788,24 +906,42 @@
                             ${routeCountStr}
                         </div>
                         <div class="result-sub">
-                            🚌 ${routeNames} · ${group.region}
+                            🚏 ${routeNames} · ${group.region}
                         </div>
                     </div>
                 `;
             }).join('');
 
-            if (filteredGroups.length > 50) {
-                html += `<div style="text-align:center; padding:6px; font-size:11px; color:#868e96;">외 ${filteredGroups.length - 50}개 결과가 더 있습니다.</div>`;
-            }
-
-            listEl.innerHTML = html;
+            listEl.innerHTML = routeHeaderHtml + stopsHtml;
         }
 
-        // 검색 목록 항목 클릭 시
+        // 검색 목록에서 정류장 항목 클릭 시
         window.onSearchResultClick = function(key) {
             const target = stopGroups[key];
             if (target) {
-                openStopPopup(target, true, 0);
+                // 검색어가 있을 경우 일치하는 노선을 기본 활성화
+                let preferredIdx = 0;
+                if (currentKeyword) {
+                    const matchIdx = target.routes.findIndex(r => 
+                        r['노선명'].toLowerCase().includes(currentKeyword.toLowerCase())
+                    );
+                    if (matchIdx !== -1) preferredIdx = matchIdx;
+                }
+                openStopPopup(target, true, preferredIdx);
+            }
+        };
+
+        // 검색 목록에서 노선 전체 바로가기 카드 클릭 시
+        window.onRouteSelectFromSearch = function(routeKey) {
+            const stops = routeGroups[routeKey];
+            if (stops && stops.length > 0) {
+                const firstStop = stops[0];
+                const stopKey = `${firstStop._type}__${firstStop.lat.toFixed(5)}__${firstStop.lng.toFixed(5)}`;
+                const targetGroup = stopGroups[stopKey];
+                if (targetGroup) {
+                    const routeIdx = targetGroup.routes.findIndex(r => r['노선명'] === firstStop['노선명']);
+                    openStopPopup(targetGroup, false, routeIdx !== -1 ? routeIdx : 0);
+                }
             }
         };
 
@@ -860,7 +996,7 @@
                 statusEl.innerHTML = `<span><b>${modeLabel}</b> 정류장 <span class="badge-count">${filtered.length}개</span> (노선 ${totalRoutesInFiltered}건)${filterNote}</span>`;
 
                 if (query) {
-                    renderSearchResultsList(filtered);
+                    renderSearchResultsList(filtered, query);
                     resultsListEl.style.display = 'block';
                 } else {
                     resultsListEl.style.display = 'none';
