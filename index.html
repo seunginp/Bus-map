@@ -272,12 +272,93 @@
         .legend-item { display: flex; align-items: center; margin-bottom: 5px; }
         .legend-color { width: 14px; height: 14px; border-radius: 3px; margin-right: 6px; opacity: 0.7; flex-shrink: 0; }
         
-        /* 팝업 스타일 */
+        /* 스마트 방향 안내창 (노선 경로를 가리지 않도록 상/하/좌/우 빈 방향으로 배치) */
+        .smart-popup {
+            margin-bottom: 0 !important;
+            pointer-events: none;
+        }
+        .smart-popup .leaflet-popup-tip-container {
+            display: none !important;
+        }
+        .smart-popup .leaflet-popup-content-wrapper {
+            pointer-events: auto;
+            position: relative;
+            border-radius: 12px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.22);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            padding: 0;
+            background: rgba(255, 255, 255, 0.98);
+        }
+        .smart-popup .leaflet-popup-content {
+            margin: 12px 14px !important;
+        }
+        /* 위쪽(top): 핀 위에 표시 */
+        .smart-popup.dir-top .leaflet-popup-content-wrapper {
+            transform: translate(0, -20px);
+        }
+        .smart-popup.dir-top .leaflet-popup-content-wrapper::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 8px 8px 0 8px;
+            border-style: solid;
+            border-color: rgba(255, 255, 255, 0.98) transparent transparent transparent;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.12));
+        }
+        /* 아래쪽(bottom): 핀 아래에 표시 */
+        .smart-popup.dir-bottom .leaflet-popup-content-wrapper {
+            transform: translate(0, calc(100% + 20px));
+        }
+        .smart-popup.dir-bottom .leaflet-popup-content-wrapper::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 0 8px 8px 8px;
+            border-style: solid;
+            border-color: transparent transparent rgba(255, 255, 255, 0.98) transparent;
+            filter: drop-shadow(0 -2px 2px rgba(0,0,0,0.08));
+        }
+        /* 왼쪽(left): 핀 왼쪽에 표시 */
+        .smart-popup.dir-left .leaflet-popup-content-wrapper {
+            transform: translate(calc(-50% - 22px), 50%);
+        }
+        .smart-popup.dir-left .leaflet-popup-content-wrapper::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-width: 8px 0 8px 8px;
+            border-style: solid;
+            border-color: transparent transparent transparent rgba(255, 255, 255, 0.98);
+            filter: drop-shadow(2px 0 2px rgba(0,0,0,0.1));
+        }
+        /* 오른쪽(right): 핀 오른쪽에 표시 */
+        .smart-popup.dir-right .leaflet-popup-content-wrapper {
+            transform: translate(calc(50% + 22px), 50%);
+        }
+        .smart-popup.dir-right .leaflet-popup-content-wrapper::after {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-width: 8px 8px 8px 0;
+            border-style: solid;
+            border-color: transparent rgba(255, 255, 255, 0.98) transparent transparent;
+            filter: drop-shadow(-2px 0 2px rgba(0,0,0,0.1));
+        }
+
+        /* 팝업 내부 스타일 */
         .custom-popup {
             font-size: 13px;
             line-height: 1.5;
             min-width: 280px;
-            max-width: 350px;
+            max-width: 330px;
         }
         .popup-title-bar {
             display: flex;
@@ -297,8 +378,15 @@
             color: #212529;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             word-break: keep-all;
+            flex: 1;
+        }
+        .popup-header-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
         }
         .route-count-badge {
             background: #f1f3f5;
@@ -308,6 +396,27 @@
             padding: 2px 7px;
             border-radius: 10px;
             white-space: nowrap;
+        }
+        .popup-close-btn {
+            background: #f1f3f5;
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #495057;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            line-height: 1;
+            transition: background 0.15s, color 0.15s;
+        }
+        .popup-close-btn:hover {
+            background: #e03131;
+            color: #fff;
         }
 
         /* 팝업 내 노선 전환 탭 */
@@ -377,6 +486,12 @@
             margin-bottom: 8px;
             border-bottom: 1px dashed #dee2e6;
             padding-bottom: 5px;
+        }
+        .route-color-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
         }
         .sequence-list {
             max-height: 155px;
@@ -455,16 +570,28 @@
         .highlight { color: #D63384; font-weight: bold; }
         
         /* 순서 번호 마커 */
-        .seq-marker { background: #E03131; color: white; border: 2px solid white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
-        .seq-marker.selected { background: #1971C2 !important; transform: scale(1.15); }
-
-        .leaflet-popup-close-button {
-            font-size: 18px !important;
-            padding: 4px 6px !important;
-            color: #495057 !important;
+        .seq-marker {
+            background: #E03131;
+            color: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            cursor: pointer;
+            transition: transform 0.15s ease;
         }
-        .leaflet-popup-close-button:hover {
-            color: #000 !important;
+        .seq-marker:hover {
+            transform: scale(1.2);
+        }
+        .seq-marker.selected {
+            background: #1971C2 !important;
+            transform: scale(1.18);
         }
 
         @media (max-width: 600px) {
@@ -576,15 +703,28 @@
             return '출근';
         }
 
+        // 오버레이 및 안내창 모두 정리
         function clearRouteOverlay() {
+            if (currentPopup) {
+                map.removeLayer(currentPopup);
+                currentPopup = null;
+            }
             currentPolylines.forEach(p => map.removeLayer(p));
             currentPolylines = [];
             currentOrderMarkers.forEach(m => map.removeLayer(m));
             currentOrderMarkers = [];
             currentActiveStopGroup = null;
             currentActiveRouteIdx = 0;
-            currentPopup = null;
         }
+
+        // 사용자가 안내창의 X 버튼을 눌렀을 때만 닫히도록 처리
+        window.closeRoutePopup = function(e) {
+            if (e) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+            clearRouteOverlay();
+        };
 
         // 1. 노선별 그룹화 및 2. 정류장 위치별(중복 방지) 그룹화
         busData.forEach(item => {
@@ -611,11 +751,10 @@
             stopGroups[stopKey].routes.push(item);
         });
 
-        // 위치 그룹별 마커 생성 (중복 위치 핀 겹침 문제 해결)
+        // 위치 그룹별 마커 생성 (bindPopup을 사용하지 않아 토글 충돌 및 확대/축소만 되는 버그 원천 차단)
         Object.values(stopGroups).forEach(group => {
             let marker;
             if (group.routes.length > 1) {
-                // 여러 노선이 경유하는 정류장은 노선 수 배지 표시
                 const multiIcon = L.divIcon({
                     className: '',
                     html: `<div class="multi-pin ${group.type === '퇴근' ? 'pin-out' : ''}" title="${group.stopName} (${group.routes.length}개 노선 경유)">
@@ -629,17 +768,80 @@
                 marker = L.marker([group.lat, group.lng], { title: `${group.stopName} (${group.routes[0]['노선명']})` });
             }
 
-            // 핀 클릭 시 항상 안내창이 열리도록 처리
+            // 핀 클릭/더블클릭 시 지도 더블클릭 줌 간섭을 막고 항상 안내창이 열리도록 처리
             marker.on('click', function(e) {
                 L.DomEvent.stopPropagation(e);
                 openStopPopup(group, false, 0);
+            });
+            marker.on('dblclick', function(e) {
+                L.DomEvent.stopPropagation(e);
             });
 
             group.marker = marker;
         });
 
+        // 노선 경로를 가리지 않는 최적의 팝업 방향(top, bottom, left, right) 자동 계산
+        function getBestPopupDirection(stopGroup) {
+            const sLat = stopGroup.lat;
+            const sLng = stopGroup.lng;
+            const vectors = [];
+
+            stopGroup.routes.forEach(r => {
+                const routeKey = `${r._type}__${r['노선명']}`;
+                const sameRoute = (routeGroups[routeKey] || [r]).slice().sort((a, b) => a['순번'] - b['순번']);
+                const myIdx = sameRoute.findIndex(s => s['순번'] === r['순번']);
+
+                sameRoute.forEach((other, idx) => {
+                    if (idx === myIdx) return;
+                    const dx = (other.lng - sLng) * 0.79;
+                    const dy = (sLat - other.lat); // 화면 Y축: 양수는 아래쪽(남쪽), 음수는 위쪽(북쪽)
+                    const dist = Math.hypot(dx, dy);
+                    if (dist < 1e-6) return;
+                    // 바로 인접한 정류장으로 향하는 선분의 가중치를 높게 부여하여 경로선 가림 방지
+                    const isAdjacent = Math.abs(idx - myIdx) === 1;
+                    const weight = isAdjacent ? 3.5 : 1.0;
+                    vectors.push({ ux: dx / dist, uy: dy / dist, weight });
+                });
+            });
+
+            if (vectors.length === 0) return 'top';
+
+            const dirs = [
+                { name: 'bottom', dx: 0, dy: 1 },
+                { name: 'top',    dx: 0, dy: -1 },
+                { name: 'left',   dx: -1, dy: 0 },
+                { name: 'right',  dx: 1, dy: 0 }
+            ];
+
+            let bestDir = 'bottom';
+            let minScore = Infinity;
+
+            dirs.forEach(d => {
+                let maxProj = -Infinity;
+                let sumPos = 0;
+                vectors.forEach(v => {
+                    const dot = (d.dx * v.ux + d.dy * v.uy);
+                    if (dot * v.weight > maxProj) maxProj = dot * v.weight;
+                    if (dot > -0.2) {
+                        sumPos += (dot + 0.2) * v.weight;
+                    }
+                });
+                const score = maxProj * 2 + sumPos;
+                if (score < minScore) {
+                    minScore = score;
+                    bestDir = d.name;
+                }
+            });
+
+            return bestDir;
+        }
+
         // 팝업 내부에서 탭 클릭 시 노선 전환
-        window.onRouteTabClick = function(idx) {
+        window.onRouteTabClick = function(e, idx) {
+            if (e) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
             if (currentActiveStopGroup) {
                 currentActiveRouteIdx = idx;
                 if (currentPopup) {
@@ -649,7 +851,7 @@
             }
         };
 
-        // 팝업 HTML 생성 함수 (노선의 1번, 2번 등 모든 정류장 순서 완벽 표시)
+        // 팝업 HTML 생성 함수 (노선의 1번, 2번 등 모든 정류장 순서 완벽 표시 + 커스텀 닫기 버튼)
         function generatePopupHtml(stopGroup, activeRouteIdx = 0) {
             const isMulti = stopGroup.routes.length > 1;
             const tagClass = stopGroup.type === '퇴근' ? 'badge-out' : 'badge-in';
@@ -670,7 +872,7 @@
                                 const c = routeColors[idx % routeColors.length];
                                 return `
                                     <button type="button" class="route-tab-pill ${isCur ? 'active' : ''}" 
-                                        onclick="window.onRouteTabClick(${idx})"
+                                        onclick="window.onRouteTabClick(event, ${idx})"
                                         style="--tab-color: ${c};">
                                         <span class="tab-dot" style="background:${c}"></span>
                                         <b>${r['노선명']}</b>
@@ -717,7 +919,10 @@
                 <div class="custom-popup ${stopGroup.type === '퇴근' ? 'commute-out' : ''}">
                     <div class="popup-title-bar">
                         <h4>🚏 <span class="tag-badge ${tagClass}">${stopGroup.type}</span> ${stopGroup.stopName}</h4>
-                        <span class="route-count-badge">${isMulti ? `경유 노선 ${stopGroup.routes.length}개` : '단일 노선'}</span>
+                        <div class="popup-header-right">
+                            <span class="route-count-badge">${isMulti ? `경유 노선 ${stopGroup.routes.length}개` : '단일 노선'}</span>
+                            <button type="button" class="popup-close-btn" onclick="window.closeRoutePopup(event)" title="닫기">✕</button>
+                        </div>
                     </div>
                     ${tabsHtml}
                     ${stopsListHtml}
@@ -734,7 +939,7 @@
                 const isSelected = (idx === routeIdx);
                 poly.setStyle({
                     weight: isSelected ? 5.5 : 3,
-                    opacity: isSelected ? 0.95 : 0.4,
+                    opacity: isSelected ? 0.95 : 0.45,
                     dashArray: isSelected ? '6, 8' : '3, 6'
                 });
                 if (isSelected) {
@@ -742,7 +947,7 @@
                 }
             });
 
-            // 2. 정류장 순번 번호 마커 갱신 (1번, 2번 등 순번 마커 지도에 표시)
+            // 2. 정류장 순번 번호 마커 갱신 (1번, 2번 등 순번 마커 지도에 표시 + 클릭 가능)
             currentOrderMarkers.forEach(m => map.removeLayer(m));
             currentOrderMarkers = [];
 
@@ -760,7 +965,20 @@
                     iconSize: [24, 24],
                     iconAnchor: [12, 12]
                 });
-                const seqMarker = L.marker([stop.lat, stop.lng], { icon: seqIcon, interactive: false, zIndexOffset: 2000 }).addTo(map);
+                const seqMarker = L.marker([stop.lat, stop.lng], { icon: seqIcon, interactive: true, zIndexOffset: 2000 }).addTo(map);
+                // 순번 마커(1, 2, 3...) 자체를 클릭해도 해당 정류장 안내창이 즉시 열리도록 연결
+                seqMarker.on('click', function(e) {
+                    L.DomEvent.stopPropagation(e);
+                    const targetKey = `${stop._type}__${stop.lat.toFixed(5)}__${stop.lng.toFixed(5)}`;
+                    const targetGroup = stopGroups[targetKey];
+                    if (targetGroup) {
+                        const rIdx = targetGroup.routes.findIndex(r => r['노선명'] === selectedItem['노선명']);
+                        openStopPopup(targetGroup, false, rIdx !== -1 ? rIdx : 0);
+                    }
+                });
+                seqMarker.on('dblclick', function(e) {
+                    L.DomEvent.stopPropagation(e);
+                });
                 currentOrderMarkers.push(seqMarker);
             });
         }
@@ -787,36 +1005,51 @@
                         color: color,
                         weight: isSelected ? 5.5 : 3.5,
                         opacity: isSelected ? 0.95 : 0.6,
-                        dashArray: isSelected ? '6, 8' : '4, 8'
+                        dashArray: isSelected ? '6, 8' : '4, 8',
+                        interactive: false
                     }).addTo(map);
                     currentPolylines.push(polyline);
                 }
             });
 
+            // 노선 경로를 가리지 않는 최적 방향 산출
+            const bestDir = getBestPopupDirection(stopGroup);
             const popupContent = generatePopupHtml(stopGroup, initialRouteIdx);
 
-            // closeOnClick: false -> 사용자가 'X' 버튼을 누를 때까지 팝업이 닫히지 않고 항상 유지됨
+            // bindPopup 대신 map에 직접 openOn하여 토글 닫힘 버그 및 remove 이벤트 충돌 원천 차단
             currentPopup = L.popup({
                 closeOnClick: false,
-                autoClose: true,
-                offset: [0, -10],
-                maxWidth: 350
-            }).setContent(popupContent);
-
-            // 사용자가 X 버튼을 눌러 팝업을 닫았을 때 선 및 순번 마커 정리
-            currentPopup.on('remove', function() {
-                clearRouteOverlay();
-            });
-
-            stopGroup.marker.bindPopup(currentPopup).openPopup();
+                autoClose: false,
+                closeButton: false,
+                autoPan: false,
+                offset: [0, 0],
+                maxWidth: 350,
+                className: `smart-popup dir-${bestDir}`
+            })
+            .setLatLng([stopGroup.lat, stopGroup.lng])
+            .setContent(popupContent)
+            .openOn(map);
 
             // 선택된 노선의 순번 마커(1번, 2번...) 표시
             highlightRoute(initialRouteIdx);
 
-            if (zoomIn) {
-                map.setView([stopGroup.lat, stopGroup.lng], 14);
-            } else if (allBoundsPoints.length > 1) {
-                map.fitBounds(L.latLngBounds(allBoundsPoints).pad(0.15));
+            // 안내창 방향 및 우측 검색 패널을 고려한 스마트 여백으로 경로 전체가 가려지지 않게 지도 범위 조정
+            if (allBoundsPoints.length > 1) {
+                const padTopLeft = [
+                    bestDir === 'left' ? 350 : 70,
+                    bestDir === 'top' ? 280 : 70
+                ];
+                const padBottomRight = [
+                    bestDir === 'right' ? 420 : 370,
+                    bestDir === 'bottom' ? 280 : 70
+                ];
+                map.fitBounds(L.latLngBounds(allBoundsPoints), {
+                    paddingTopLeft: padTopLeft,
+                    paddingBottomRight: padBottomRight,
+                    maxZoom: 15
+                });
+            } else {
+                map.setView([stopGroup.lat, stopGroup.lng], 15);
             }
         }
 
@@ -919,7 +1152,6 @@
         window.onSearchResultClick = function(key) {
             const target = stopGroups[key];
             if (target) {
-                // 검색어가 있을 경우 일치하는 노선을 기본 활성화
                 let preferredIdx = 0;
                 if (currentKeyword) {
                     const matchIdx = target.routes.findIndex(r => 
