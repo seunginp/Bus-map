@@ -267,21 +267,28 @@
 
         /* 범례 */
         .legend {
-            position: absolute; bottom: 20px; right: 20px; background: white;
+            position: absolute; bottom: 20px; right: 20px; background: rgba(255, 255, 255, 0.96);
             padding: 10px 14px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.15);
             font-size: 12px; z-index: 1000; max-height: 240px; overflow-y: auto;
             border: 1px solid rgba(0,0,0,0.08);
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
-        .legend-title { font-weight: bold; margin-bottom: 6px; color: #333; }
-        .legend-item { display: flex; align-items: center; margin-bottom: 5px; }
+        .legend-title {
+            font-weight: bold; margin-bottom: 6px; color: #333;
+            display: flex; align-items: center; justify-content: space-between; gap: 6px;
+            cursor: pointer; user-select: none;
+        }
+        .legend-toggle-icon { display: none; font-size: 10px; color: #868e96; }
+        .legend-item { display: flex; align-items: center; margin-bottom: 5px; white-space: nowrap; }
         .legend-color { width: 14px; height: 14px; border-radius: 3px; margin-right: 6px; opacity: 0.7; flex-shrink: 0; }
         
-        /* 마우스로 끌어서 이동 가능한 독립형 정보창 (Floating Info Box) */
+        /* 마우스로 끌어서 이동 가능한 독립형 정보창 (Floating Info Box) - 글자 길이에 맞춰 가로폭 자동 조절 */
         .floating-info-box {
             position: fixed;
             z-index: 1100;
-            width: 330px;
-            max-width: calc(100vw - 24px);
+            width: max-content;
+            min-width: 345px;
+            max-width: calc(100vw - 16px);
             background: rgba(255, 255, 255, 0.99);
             border-radius: 12px;
             box-shadow: 0 10px 32px rgba(0, 0, 0, 0.28);
@@ -294,6 +301,12 @@
         .floating-info-box.dragging {
             box-shadow: 0 14px 40px rgba(0, 0, 0, 0.38);
             opacity: 0.97;
+        }
+        .floating-info-box.is-minimized .popup-collapsible-body {
+            display: none;
+        }
+        .floating-info-box.is-minimized .popup-duration-banner {
+            margin-bottom: 0;
         }
         /* 말풍선 꼬리 화살표 (드래그하기 전 핀 옆에 자동 배치되었을 때 표시) */
         .floating-info-box.dir-top::after {
@@ -345,7 +358,7 @@
             pointer-events: none;
         }
 
-        /* 팝업 내부 스타일 */
+        /* 팝업 내부 스타일 (모든 텍스트가 다음 줄로 넘어가지 않고 한 줄에 표시되도록 설정) */
         .custom-popup {
             font-size: 13px;
             line-height: 1.45;
@@ -358,8 +371,9 @@
             border-bottom: 2px solid #E03131;
             padding-bottom: 7px;
             margin-bottom: 8px;
-            gap: 6px;
+            gap: 10px;
             cursor: grab;
+            white-space: nowrap;
         }
         .popup-title-bar:active {
             cursor: grabbing;
@@ -378,14 +392,15 @@
             display: flex;
             align-items: center;
             gap: 5px;
-            word-break: keep-all;
+            white-space: nowrap;
             flex: 1;
         }
         .popup-header-right {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             flex-shrink: 0;
+            white-space: nowrap;
         }
         .route-count-badge {
             background: #f1f3f5;
@@ -395,6 +410,27 @@
             padding: 2px 7px;
             border-radius: 10px;
             white-space: nowrap;
+        }
+        .popup-minimize-btn {
+            background: #f1f3f5;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            height: 22px;
+            padding: 0 7px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #495057;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            white-space: nowrap;
+            transition: background 0.15s, color 0.15s;
+        }
+        .popup-minimize-btn:hover {
+            background: #e9ecef;
+            color: #212529;
         }
         .popup-close-btn {
             background: #f1f3f5;
@@ -411,6 +447,7 @@
             justify-content: center;
             padding: 0;
             line-height: 1;
+            flex-shrink: 0;
             transition: background 0.15s, color 0.15s;
         }
         .popup-close-btn:hover {
@@ -428,8 +465,9 @@
             border-radius: 8px;
             padding: 6px 10px;
             margin-bottom: 8px;
-            gap: 8px;
+            gap: 12px;
             cursor: grab;
+            white-space: nowrap;
         }
         .popup-duration-banner:active {
             cursor: grabbing;
@@ -465,10 +503,15 @@
         .route-tabs-container {
             margin-bottom: 7px;
         }
+        .route-tabs-container.multi-row-tabs {
+            width: 0;
+            min-width: 100%;
+        }
         .tabs-label {
             font-size: 11px;
             color: #868e96;
             margin-bottom: 4px;
+            white-space: nowrap;
         }
         .route-tab-pills {
             display: flex;
@@ -486,6 +529,7 @@
             font-size: 11px;
             cursor: pointer;
             color: #495057;
+            white-space: nowrap;
             transition: all 0.15s;
         }
         .route-tab-pill:hover {
@@ -503,12 +547,14 @@
             height: 8px;
             border-radius: 50%;
             display: inline-block;
+            flex-shrink: 0;
         }
         .tab-seq {
             background: #e9ecef;
             border-radius: 3px;
-            padding: 0 3px;
+            padding: 0 4px;
             font-size: 10px;
+            white-space: nowrap;
         }
 
         /* 팝업 내 전체 승하차 경로 박스 (1~6번 등 모든 정류장을 한눈에 보고 클릭 가능) */
@@ -525,15 +571,21 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 6px;
+            gap: 12px;
             margin-bottom: 6px;
             border-bottom: 1px dashed #dee2e6;
             padding-bottom: 5px;
+            white-space: nowrap;
         }
         .sequence-header-left {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .sequence-route-title {
+            white-space: nowrap;
         }
         .sequence-click-hint {
             font-size: 10px;
@@ -549,8 +601,9 @@
             flex-shrink: 0;
         }
         .sequence-list {
-            max-height: 280px;
+            max-height: 260px;
             overflow-y: auto;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             gap: 4px;
@@ -561,10 +614,11 @@
             align-items: center;
             gap: 6px;
             font-size: 12px;
-            padding: 5px 7px;
+            padding: 5px 8px;
             border-radius: 5px;
             background: white;
             border: 1px solid #e9ecef;
+            white-space: nowrap;
             transition: all 0.12s ease;
         }
         .sequence-item.clickable-stop {
@@ -597,13 +651,13 @@
         .seq-stop-name {
             flex: 1;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            padding-right: 4px;
         }
         .seq-time {
             font-size: 11px;
             color: #868e96;
             white-space: nowrap;
+            flex-shrink: 0;
         }
         .is-current .seq-time {
             color: #C92A2A;
@@ -617,6 +671,7 @@
             border-radius: 3px;
             white-space: nowrap;
             font-weight: 700;
+            flex-shrink: 0;
         }
         .dropoff-item {
             background: #fff9db;
@@ -658,9 +713,172 @@
             opacity: 0.9;
         }
 
-        @media (max-width: 600px) {
-            .search-panel { top: 10px; right: 10px; left: 10px; width: auto; max-width: none; }
-            .legend { bottom: 10px; right: 10px; max-height: 180px; }
+        /* 모바일 화면에서 검색 패널 접기/펼치기 버튼 */
+        .mobile-panel-toggle {
+            display: none;
+            background: #f1f3f5;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #495057;
+            cursor: pointer;
+        }
+
+        /* 모바일 최적화 (지도가 넓게 보이고 안내창이 화면 하단에 컴팩트하게 배치되도록 설계) */
+        @media (max-width: 650px) {
+            .leaflet-top.leaflet-left {
+                top: auto;
+                bottom: 16px;
+                left: 8px;
+            }
+            .search-panel {
+                top: 8px;
+                right: 8px;
+                left: 8px;
+                width: auto;
+                max-width: none;
+                padding: 9px 11px;
+                border-radius: 10px;
+            }
+            .panel-header {
+                margin-bottom: 6px;
+            }
+            .panel-title {
+                font-size: 13.5px;
+            }
+            .mobile-panel-toggle {
+                display: inline-flex;
+                align-items: center;
+                gap: 3px;
+            }
+            .search-panel.mobile-collapsed .search-box,
+            .search-panel.mobile-collapsed .search-status,
+            .search-panel.mobile-collapsed .search-results-list {
+                display: none !important;
+            }
+            .search-panel.mobile-collapsed .mode-tabs {
+                margin-bottom: 0;
+            }
+            .mode-tabs {
+                padding: 3px;
+                margin-bottom: 7px;
+            }
+            .mode-btn {
+                padding: 5px 4px;
+                font-size: 12px;
+            }
+            .search-input-wrapper input {
+                padding: 7px 26px 7px 28px;
+                font-size: 12px;
+            }
+            .search-submit-btn {
+                padding: 7px 11px;
+                font-size: 12px;
+            }
+            .search-status {
+                margin-top: 5px;
+                font-size: 11px;
+            }
+            .search-results-list {
+                max-height: 160px;
+                margin-top: 6px;
+            }
+            .legend {
+                bottom: 10px;
+                right: 8px;
+                padding: 7px 10px;
+                max-height: 160px;
+                font-size: 11px;
+            }
+            .legend-toggle-icon {
+                display: inline;
+            }
+            .legend.mobile-collapsed .legend-body {
+                display: none;
+            }
+            .legend.mobile-collapsed .legend-title {
+                margin-bottom: 0;
+            }
+            .legend.hidden-by-popup {
+                opacity: 0;
+                pointer-events: none;
+                transform: translateY(10px);
+            }
+            .floating-info-box {
+                min-width: 0;
+                width: calc(100vw - 16px);
+                max-width: calc(100vw - 16px);
+                padding: 9px 11px;
+                border-radius: 12px;
+                box-shadow: 0 -2px 24px rgba(0, 0, 0, 0.26);
+            }
+            .popup-title-bar {
+                padding-bottom: 5px;
+                margin-bottom: 6px;
+                gap: 6px;
+            }
+            .popup-title-bar h4 {
+                font-size: 13px;
+            }
+            .popup-duration-banner {
+                padding: 5px 8px;
+                margin-bottom: 6px;
+                gap: 6px;
+            }
+            .duration-banner-left {
+                font-size: 11.5px;
+            }
+            .duration-banner-value {
+                font-size: 12px;
+                padding: 1px 6px;
+            }
+            .duration-banner-sub {
+                font-size: 10.5px;
+            }
+            .route-tabs-container {
+                margin-bottom: 5px;
+                width: 100% !important;
+            }
+            .tabs-label {
+                font-size: 10px;
+                margin-bottom: 3px;
+            }
+            .route-tab-pills {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding-bottom: 2px;
+                -webkit-overflow-scrolling: touch;
+            }
+            .route-tab-pill {
+                padding: 3px 7px;
+                font-size: 10.5px;
+                flex-shrink: 0;
+            }
+            .route-sequence-box {
+                padding: 6px 8px;
+            }
+            .sequence-header {
+                font-size: 11.5px;
+                margin-bottom: 4px;
+                padding-bottom: 4px;
+                gap: 6px;
+            }
+            .sequence-list {
+                max-height: 112px;
+                gap: 3px;
+            }
+            .sequence-item {
+                padding: 4px 6px;
+                font-size: 11.5px;
+                gap: 5px;
+            }
+            .seq-num-badge {
+                width: 17px;
+                height: 17px;
+                font-size: 9.5px;
+            }
         }
     </style>
 </head>
@@ -674,6 +892,7 @@
     <div class="search-panel" id="searchPanel">
         <div class="panel-header">
             <span class="panel-title">🚌 버스 노선 조회</span>
+            <button type="button" class="mobile-panel-toggle" id="mobilePanelToggleBtn" title="검색창 접기/펼치기">▲ 검색 접기</button>
         </div>
         <div class="mode-tabs">
             <button type="button" class="mode-btn active" data-mode="출근" id="btnModeCommuteIn">
@@ -700,7 +919,7 @@
         <div class="search-results-list" id="searchResultsList" style="display: none;"></div>
     </div>
 
-    <div class="legend" id="legend"></div>
+    <div class="legend mobile-collapsed" id="legend"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
@@ -883,8 +1102,10 @@
             if (floatingBoxEl) {
                 floatingBoxEl.style.display = 'none';
                 floatingBoxEl.innerHTML = '';
-                floatingBoxEl.classList.remove('dir-top', 'dir-bottom', 'dir-left', 'dir-right');
+                floatingBoxEl.classList.remove('dir-top', 'dir-bottom', 'dir-left', 'dir-right', 'is-minimized');
             }
+            const legendEl = document.getElementById('legend');
+            if (legendEl) legendEl.classList.remove('hidden-by-popup');
             isBoxManuallyMoved = false;
             routeLayer.clearLayers();
             currentOrderMarkers.forEach(m => map.removeLayer(m));
@@ -904,6 +1125,72 @@
             }
             clearRouteOverlay(true);
         };
+
+        // 안내창 접기/펼치기 (최소화) 토글 - 모바일에서 지도를 넓게 볼 때 유용
+        window.togglePopupMinimize = function(e) {
+            if (e) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+            if (!floatingBoxEl) return;
+            const minimized = floatingBoxEl.classList.toggle('is-minimized');
+            const btn = floatingBoxEl.querySelector('.popup-minimize-btn');
+            if (btn) {
+                btn.innerHTML = minimized ? '▲ 펼치기' : '▼ 접기';
+            }
+            // 모바일 하단 고정 상태(수동 드래그 전)라면 하단 위치 재정렬
+            if (!isBoxManuallyMoved && window.innerWidth <= 650) {
+                const popupH = floatingBoxEl.offsetHeight || 80;
+                floatingBoxEl.style.top = Math.max(8, window.innerHeight - popupH - 8) + 'px';
+            }
+        };
+
+        // 모바일 권역 범례 접기/펼치기
+        window.toggleMobileLegend = function(e) {
+            if (e) e.stopPropagation();
+            const legendEl = document.getElementById('legend');
+            if (!legendEl) return;
+            const collapsed = legendEl.classList.toggle('mobile-collapsed');
+            const icon = legendEl.querySelector('.legend-toggle-icon');
+            if (icon) icon.textContent = collapsed ? '▲' : '▼';
+        };
+
+        // 시간 문자열("HH:MM" 등)을 분(minutes) 단위 정수로 변환 (빠른 시간 정렬용)
+        function parseTimeMinutes(timeStr) {
+            if (!timeStr) return 99999;
+            const m = String(timeStr).trim().match(/(\d{1,2}):(\d{2})/);
+            if (!m) return 99999;
+            return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+        }
+
+        // 빠른 시간이 먼저 오도록 노선 정렬 비교 함수
+        function compareRoutesByTime(a, b) {
+            const isOutA = a._type === '퇴근';
+            const isOutB = b._type === '퇴근';
+
+            const primaryA = isOutA
+                ? parseTimeMinutes(a['출발시간'] || a['기점출발'])
+                : parseTimeMinutes(a['승차시간'] || a['출발시간'] || a['기점출발']);
+            const primaryB = isOutB
+                ? parseTimeMinutes(b['출발시간'] || b['기점출발'])
+                : parseTimeMinutes(b['승차시간'] || b['출발시간'] || b['기점출발']);
+
+            if (primaryA !== primaryB) return primaryA - primaryB;
+
+            const secondaryA = isOutA
+                ? parseTimeMinutes(a['하차시간'] || a['승차시간'])
+                : parseTimeMinutes(a['출발시간'] || a['기점출발']);
+            const secondaryB = isOutB
+                ? parseTimeMinutes(b['하차시간'] || b['승차시간'])
+                : parseTimeMinutes(b['출발시간'] || b['기점출발']);
+
+            if (secondaryA !== secondaryB) return secondaryA - secondaryB;
+
+            const nameCmp = (a['노선명'] || '').localeCompare(b['노선명'] || '', 'ko');
+            if (nameCmp !== 0) return nameCmp;
+
+            return (a['순번'] || 0) - (b['순번'] || 0);
+        }
 
         // 노선+기점출발 고유 키 생성 (동일 노선명의 여러 기점출발 시간대를 각각 독립 회차로 구분)
         function getRouteKey(item) {
@@ -935,6 +1222,11 @@
             if (!stopGroups[stopKey].routes.some(r => getRouteKey(r) === routeKey && r['순번'] === item['순번'])) {
                 stopGroups[stopKey].routes.push(item);
             }
+        });
+
+        // 각 정류장의 경유 노선들을 빠른 시간 순으로 정렬 (예: 20:00 노선이 22:00 노선보다 먼저 오도록)
+        Object.values(stopGroups).forEach(group => {
+            group.routes.sort(compareRoutesByTime);
         });
 
         // 위치 그룹별 마커 생성 (파란색 네모 형태로 경유 노선 수 1, 2, 3... 표시)
@@ -1237,12 +1529,54 @@
             });
         }
 
+        // 정보창 내부 텍스트가 한 줄에 모두 표시되도록 자동 크기 맞춤 및 현재 정류장 스크롤 정렬
+        function adjustPopupSingleLineFit(clampPosition = true) {
+            if (!floatingBoxEl || floatingBoxEl.style.display === 'none') return;
+
+            // 좁은 화면(모바일 등)에서 가로폭 제한으로 인해 줄바꿈/넘침이 발생할 수 있는 행의 폰트 크기를 자동 축소하여 한 줄 유지
+            const singleLineRows = floatingBoxEl.querySelectorAll('.popup-title-bar, .popup-duration-banner, .sequence-header, .sequence-item');
+            singleLineRows.forEach(row => {
+                row.style.fontSize = '';
+                const availW = row.clientWidth;
+                const reqW = row.scrollWidth;
+                if (availW > 0 && reqW > availW + 1) {
+                    const currentFs = parseFloat(window.getComputedStyle(row).fontSize) || 12;
+                    const ratio = availW / reqW;
+                    const newFs = Math.max(9.5, Math.floor(currentFs * ratio * 10) / 10);
+                    row.style.fontSize = newFs + 'px';
+                }
+            });
+
+            // 현재 선택된 정류장 항목 및 활성 탭이 스크롤 영역 중앙에 보이도록 자동 스크롤
+            const currentStopEl = floatingBoxEl.querySelector('.sequence-item.is-current');
+            if (currentStopEl && currentStopEl.scrollIntoView) {
+                currentStopEl.scrollIntoView({ block: 'nearest' });
+            }
+            const activePillEl = floatingBoxEl.querySelector('.route-tab-pill.active');
+            if (activePillEl && activePillEl.scrollIntoView) {
+                activePillEl.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            }
+
+            // 탭 전환이나 정류장 전환으로 창 가로폭이 넓어졌을 때 화면 밖으로 나가지 않도록 위치 보정
+            if (clampPosition && floatingBoxEl.style.left && floatingBoxEl.style.top) {
+                const boxW = floatingBoxEl.offsetWidth || 345;
+                const boxH = floatingBoxEl.offsetHeight || 240;
+                const curLeft = parseFloat(floatingBoxEl.style.left) || 8;
+                const curTop = parseFloat(floatingBoxEl.style.top) || 8;
+                const clampedLeft = Math.min(Math.max(8, curLeft), Math.max(8, window.innerWidth - boxW - 8));
+                const clampedTop = Math.min(Math.max(8, curTop), Math.max(8, window.innerHeight - boxH - 8));
+                floatingBoxEl.style.left = Math.round(clampedLeft) + 'px';
+                floatingBoxEl.style.top = Math.round(clampedTop) + 'px';
+            }
+        }
+
         // 정보창 내부에서 1~6번 정류장을 클릭했을 때, 정보창 위치는 그대로 유지하면서 해당 정류장 정보로 즉시 전환
         function selectStopInPopup(targetGroup, routeIdx) {
             if (!targetGroup) return;
             currentActiveStopGroup = targetGroup;
             currentActiveRouteIdx = routeIdx;
             floatingBoxEl.innerHTML = generatePopupHtml(targetGroup, routeIdx);
+            adjustPopupSingleLineFit(true);
             renderRouteOverlay(targetGroup, routeIdx);
         }
 
@@ -1271,6 +1605,7 @@
             if (currentActiveStopGroup) {
                 currentActiveRouteIdx = idx;
                 floatingBoxEl.innerHTML = generatePopupHtml(currentActiveStopGroup, idx);
+                adjustPopupSingleLineFit(true);
                 renderRouteOverlay(currentActiveStopGroup, idx);
             }
         };
@@ -1284,6 +1619,7 @@
             const activeRouteKey = getRouteKey(activeRouteItem);
             const allStopsOfRoute = (routeGroups[activeRouteKey] || [activeRouteItem]).slice().sort((a, b) => a['순번'] - b['순번']);
             const activeColor = routeColors[activeRouteIdx % routeColors.length];
+            const isMinimized = floatingBoxEl && floatingBoxEl.classList.contains('is-minimized');
 
             const durationText = activeRouteItem['소요시간'] || (activeRouteItem['소요시간_분'] ? `${activeRouteItem['소요시간_분']}분` : '-');
             const companyDepart = activeRouteItem['출발시간'] || (activeRouteItem['기점출발'] ? activeRouteItem['기점출발'].split('|')[0].trim() : '-');
@@ -1306,9 +1642,10 @@
 
             let tabsHtml = '';
             if (isMulti) {
+                const multiRowClass = stopGroup.routes.length > 2 ? 'multi-row-tabs' : '';
                 tabsHtml = `
-                    <div class="route-tabs-container">
-                        <div class="tabs-label">경유 노선 선택 (${stopGroup.routes.length}개):</div>
+                    <div class="route-tabs-container ${multiRowClass}">
+                        <div class="tabs-label">경유 노선 선택 (${stopGroup.routes.length}개 · 빠른 시간순):</div>
                         <div class="route-tab-pills">
                             ${stopGroup.routes.map((r, idx) => {
                                 const isCur = idx === activeRouteIdx;
@@ -1344,7 +1681,7 @@
                     <div class="sequence-header">
                         <div class="sequence-header-left">
                             <span class="route-color-dot" style="background:${activeColor}"></span>
-                            <b>🚌 ${activeRouteItem['노선명']}</b> (${allStopsOfRoute.length}개 ${isOut ? '하차' : '승차'})
+                            <span class="sequence-route-title"><b>🚌 ${activeRouteItem['노선명']}</b> (${allStopsOfRoute.length}개 ${isOut ? '하차' : '승차'})</span>
                         </div>
                         <span class="sequence-click-hint">👆 정류장 클릭 시 전환</span>
                     </div>
@@ -1391,12 +1728,15 @@
                         <h4><span class="drag-handle-icon">⠿</span>🚏 <span class="tag-badge ${tagClass}">${stopGroup.type}</span> ${stopGroup.stopName}</h4>
                         <div class="popup-header-right">
                             <span class="route-count-badge">${isMulti ? `경유 노선 ${stopGroup.routes.length}개` : '단일 노선'}</span>
+                            <button type="button" class="popup-minimize-btn" onclick="window.togglePopupMinimize(event)" title="정류장 목록 접기/펼치기">${isMinimized ? '▲ 펼치기' : '▼ 접기'}</button>
                             <button type="button" class="popup-close-btn" onclick="window.closeRoutePopup(event)" title="닫기 (전체 정류장 다시 보기)">✕</button>
                         </div>
                     </div>
                     ${durationBannerHtml}
-                    ${tabsHtml}
-                    ${stopsListHtml}
+                    <div class="popup-collapsible-body">
+                        ${tabsHtml}
+                        ${stopsListHtml}
+                    </div>
                 </div>
             `;
         }
@@ -1426,46 +1766,80 @@
                 sameRoute.forEach(d => allBoundsPoints.push([d.lat, d.lng]));
             });
 
-            // 1. 먼저 노선 전체가 우측 검색 패널을 피해 화면에 잘 들어오도록 범위 맞춤
             const mapW = map.getSize().x;
             const isMobile = mapW <= 650;
-            if (allBoundsPoints.length > 1) {
-                map.fitBounds(L.latLngBounds(allBoundsPoints), {
-                    paddingTopLeft: [70, 55],
-                    paddingBottomRight: [isMobile ? 70 : 385, 55],
-                    maxZoom: 15,
-                    animate: false
-                });
-            } else {
-                map.setView([stopGroup.lat, stopGroup.lng], 15, { animate: false });
+
+            // 모바일에서 정류장 선택 시 검색 결과 드롭다운과 범례가 지도를 가리지 않도록 정리
+            if (isMobile) {
+                const resultsListEl = document.getElementById('searchResultsList');
+                if (resultsListEl) resultsListEl.style.display = 'none';
+                const legendEl = document.getElementById('legend');
+                if (legendEl) legendEl.classList.add('hidden-by-popup');
             }
 
-            // 2. 선택된 노선 경로선 및 해당 노선의 정류장 순번 마커만 지도에 렌더링
+            // 1. 선택된 노선 경로선 및 해당 노선의 정류장 순번 마커만 지도에 렌더링
             renderRouteOverlay(stopGroup, initialRouteIdx);
 
-            // 3. 정보창 내용 렌더링 및 표시
+            // 2. 정보창 내용 먼저 렌더링하여 실제 가로/세로 크기 측정 및 한 줄 맞춤 적용
+            floatingBoxEl.classList.remove('is-minimized');
             floatingBoxEl.innerHTML = generatePopupHtml(stopGroup, initialRouteIdx);
             floatingBoxEl.style.display = 'block';
+            adjustPopupSingleLineFit(false);
 
-            if (!keepManualPos) {
-                isBoxManuallyMoved = false;
-                const popupW = floatingBoxEl.offsetWidth || 330;
-                const popupH = floatingBoxEl.offsetHeight || 280;
+            const popupW = floatingBoxEl.offsetWidth || 350;
+            const popupH = floatingBoxEl.offsetHeight || 250;
 
-                const placement = computeOptimalPopupPlacement(stopGroup, popupW, popupH);
+            if (isMobile) {
+                // 모바일: 안내창을 화면 하단에 깔끔하게 배치하고, 상단 검색바와 하단 안내창 사이의 열린 지도 공간에 노선 전체가 들어오도록 맞춤
+                const searchPanelEl = document.getElementById('searchPanel');
+                const topPanelH = searchPanelEl ? searchPanelEl.offsetHeight : 110;
 
-                if (Math.abs(placement.panX) > 1 || Math.abs(placement.panY) > 1) {
-                    map.panBy([placement.panX, placement.panY], { animate: false });
+                if (allBoundsPoints.length > 1) {
+                    map.fitBounds(L.latLngBounds(allBoundsPoints), {
+                        paddingTopLeft: [24, topPanelH + 18],
+                        paddingBottomRight: [24, popupH + 22],
+                        maxZoom: 15,
+                        animate: false
+                    });
+                } else {
+                    map.setView([stopGroup.lat, stopGroup.lng], 14, { animate: false });
                 }
 
-                // panBy 반영 후 최종 픽셀 위치에 정보창 배치
-                const finalLeft = Math.min(Math.max(8, placement.rect.left - placement.panX), Math.max(8, window.innerWidth - popupW - 8));
-                const finalTop = Math.min(Math.max(8, placement.rect.top - placement.panY), Math.max(8, window.innerHeight - popupH - 8));
+                if (!keepManualPos) {
+                    isBoxManuallyMoved = false;
+                    floatingBoxEl.classList.remove('dir-top', 'dir-bottom', 'dir-left', 'dir-right');
+                    floatingBoxEl.style.left = '8px';
+                    floatingBoxEl.style.top = Math.max(8, window.innerHeight - popupH - 8) + 'px';
+                }
+            } else {
+                // 데스크톱/태블릿: 우측 검색 패널을 피해 노선을 배치하고 정류장 핀 옆 최적 위치에 안내창 표시
+                if (allBoundsPoints.length > 1) {
+                    map.fitBounds(L.latLngBounds(allBoundsPoints), {
+                        paddingTopLeft: [70, 55],
+                        paddingBottomRight: [385, 55],
+                        maxZoom: 15,
+                        animate: false
+                    });
+                } else {
+                    map.setView([stopGroup.lat, stopGroup.lng], 15, { animate: false });
+                }
 
-                floatingBoxEl.classList.remove('dir-top', 'dir-bottom', 'dir-left', 'dir-right');
-                floatingBoxEl.classList.add(`dir-${placement.dir}`);
-                floatingBoxEl.style.left = Math.round(finalLeft) + 'px';
-                floatingBoxEl.style.top = Math.round(finalTop) + 'px';
+                if (!keepManualPos) {
+                    isBoxManuallyMoved = false;
+                    const placement = computeOptimalPopupPlacement(stopGroup, popupW, popupH);
+
+                    if (Math.abs(placement.panX) > 1 || Math.abs(placement.panY) > 1) {
+                        map.panBy([placement.panX, placement.panY], { animate: false });
+                    }
+
+                    const finalLeft = Math.min(Math.max(8, placement.rect.left - placement.panX), Math.max(8, window.innerWidth - popupW - 8));
+                    const finalTop = Math.min(Math.max(8, placement.rect.top - placement.panY), Math.max(8, window.innerHeight - popupH - 8));
+
+                    floatingBoxEl.classList.remove('dir-top', 'dir-bottom', 'dir-left', 'dir-right');
+                    floatingBoxEl.classList.add(`dir-${placement.dir}`);
+                    floatingBoxEl.style.left = Math.round(finalLeft) + 'px';
+                    floatingBoxEl.style.top = Math.round(finalTop) + 'px';
+                }
             }
         }
 
@@ -1473,7 +1847,15 @@
         const legendDiv = document.getElementById('legend');
         function updateRegionsAndLegend(currentGroups) {
             regionLayer.clearLayers();
-            legendDiv.innerHTML = '<div class="legend-title">📍 권역 범례</div>';
+            const isCollapsed = legendDiv.classList.contains('mobile-collapsed');
+            legendDiv.innerHTML = `
+                <div class="legend-title" onclick="window.toggleMobileLegend(event)">
+                    <span>📍 권역 범례</span>
+                    <span class="legend-toggle-icon">${isCollapsed ? '▲' : '▼'}</span>
+                </div>
+                <div class="legend-body"></div>
+            `;
+            const legendBody = legendDiv.querySelector('.legend-body');
 
             const currentRegions = {};
             currentGroups.forEach(g => {
@@ -1484,7 +1866,7 @@
 
             const regionNames = Object.keys(currentRegions);
             if (regionNames.length === 0) {
-                legendDiv.innerHTML += '<div style="color:#888; font-size:11px;">표시할 지역 없음</div>';
+                legendBody.innerHTML += '<div style="color:#888; font-size:11px;">표시할 지역 없음</div>';
                 return;
             }
 
@@ -1497,7 +1879,7 @@
                     interactive: false
                 }).addTo(regionLayer);
 
-                legendDiv.innerHTML += `
+                legendBody.innerHTML += `
                     <div class="legend-item">
                         <div class="legend-color" style="background:${color}"></div>
                         <span>${regionName} <small style="color:#888;">(${currentRegions[regionName].length})</small></span>
@@ -1515,7 +1897,7 @@
                     const [rtype, rname] = rk.split('__');
                     if (currentMode !== '전체' && rtype !== currentMode) return false;
                     return (rname || '').toLowerCase().includes(query.toLowerCase());
-                });
+                }).sort((rkA, rkB) => compareRoutesByTime(routeGroups[rkA][0], routeGroups[rkB][0]));
 
                 if (matchedRoutes.length > 0) {
                     routeHeaderHtml = matchedRoutes.slice(0, 6).map(rk => {
@@ -1669,7 +2051,7 @@
                         const [rtype, rname] = rk.split('__');
                         if (currentMode !== '전체' && rtype !== currentMode) return false;
                         return (rname || '').toLowerCase().includes(query);
-                    });
+                    }).sort((rkA, rkB) => compareRoutesByTime(routeGroups[rkA][0], routeGroups[rkB][0]));
                     const exactRoute = matchedRoutes.find(rk => (rk.split('__')[1] || '').toLowerCase() === query);
 
                     if (exactRoute || matchedRoutes.length === 1) {
@@ -1736,6 +2118,17 @@
                 setMode(this.dataset.mode);
             });
         });
+
+        const mobileToggleBtn = document.getElementById('mobilePanelToggleBtn');
+        if (mobileToggleBtn) {
+            mobileToggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const panel = document.getElementById('searchPanel');
+                if (!panel) return;
+                const collapsed = panel.classList.toggle('mobile-collapsed');
+                this.textContent = collapsed ? '▼ 검색 펼치기' : '▲ 검색 접기';
+            });
+        }
 
         const searchInputEl = document.getElementById('searchInput');
         searchInputEl.addEventListener('input', function() {
