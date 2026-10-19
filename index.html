@@ -74,10 +74,10 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
         }
         .mode-btn[data-mode="출근"].active {
-            background: #E03131;
+            background: #228BE6;
         }
         .mode-btn[data-mode="퇴근"].active {
-            background: #1971C2;
+            background: #7950F2;
         }
         .mode-btn[data-mode="전체"].active {
             background: #495057;
@@ -104,7 +104,7 @@
         }
         .search-input-wrapper input {
             width: 100%;
-            padding: 9px 28px 9px 30px;
+            padding: 9px 38px 9px 30px;
             border: 1px solid #ced4da;
             border-radius: 8px;
             font-size: 13px;
@@ -118,19 +118,20 @@
         }
         .clear-btn {
             position: absolute;
-            right: 8px;
+            right: 6px;
             background: #dee2e6;
             border: none;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
+            border-radius: 10px;
+            width: 28px;
+            height: 20px;
             font-size: 11px;
+            font-weight: bold;
             color: #495057;
             cursor: pointer;
             display: none;
             align-items: center;
             justify-content: center;
-            padding: 0;
+            padding: 0 6px;
             line-height: 1;
         }
         .clear-btn:hover {
@@ -229,37 +230,36 @@
             font-weight: 700;
         }
         .tag-badge.badge-in {
-            background: #FFE3E3;
-            color: #C92A2A;
-        }
-        .tag-badge.badge-out {
             background: #D0EBFF;
             color: #1864AB;
         }
+        .tag-badge.badge-out {
+            background: #E5DBFF;
+            color: #5F3DC4;
+        }
 
-        /* 정류장 경유노선 수 파란색 네모 핀 (단일 노선 '1' 및 중복 경유 노선 '2+' 모두 파란색 네모로 표시) */
+        /* 정류장 경유노선 수 네모 핀 (1~10 숫자 모두 동일 색상 통일, 출근=파란색 / 퇴근=보라색 구분) */
         .stop-pin {
-            width: 22px;
-            height: 22px;
-            border-radius: 4px;
-            background: #339AF0;
+            width: 24px;
+            height: 24px;
+            border-radius: 5px;
+            background: #228BE6;
             color: white;
             border: 2px solid white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.42);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
+            font-size: 11.5px;
             font-weight: 800;
             cursor: pointer;
             box-sizing: border-box;
         }
-        .stop-pin.is-multi {
-            width: 25px;
-            height: 25px;
-            background: #1864AB;
-            font-size: 12px;
-            box-shadow: 0 2px 7px rgba(0,0,0,0.5);
+        .stop-pin.pin-in {
+            background: #228BE6;
+        }
+        .stop-pin.pin-out {
+            background: #7950F2;
         }
         .stop-pin:hover {
             filter: brightness(1.12);
@@ -434,10 +434,11 @@
         }
         .popup-close-btn {
             background: #f1f3f5;
-            border: none;
-            border-radius: 50%;
-            width: 22px;
+            border: 1px solid #dee2e6;
+            border-radius: 11px;
+            min-width: 36px;
             height: 22px;
+            padding: 0 10px;
             font-size: 12px;
             font-weight: bold;
             color: #495057;
@@ -445,13 +446,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0;
             line-height: 1;
             flex-shrink: 0;
-            transition: background 0.15s, color 0.15s;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
         }
         .popup-close-btn:hover {
             background: #e03131;
+            border-color: #e03131;
             color: #fff;
         }
 
@@ -1229,19 +1230,20 @@
             group.routes.sort(compareRoutesByTime);
         });
 
-        // 위치 그룹별 마커 생성 (파란색 네모 형태로 경유 노선 수 1, 2, 3... 표시)
+        // 위치 그룹별 마커 생성 (1~10 숫자 색상 통일, 출근=파란색 네모 / 퇴근=보라색 네모 구분)
         Object.values(stopGroups).forEach(group => {
             const count = group.routes.length;
             const isMulti = count > 1;
-            const size = isMulti ? 25 : 22;
-            const anchor = Math.round(size / 2);
+            const size = 24;
+            const anchor = 12;
+            const pinTypeClass = group.type === '퇴근' ? 'pin-out' : 'pin-in';
             const titleText = isMulti
-                ? `${group.stopName} (${count}개 노선 경유)`
-                : `${group.stopName} (${group.routes[0]['노선명']})`;
+                ? `[${group.type}] ${group.stopName} (${count}개 노선 경유)`
+                : `[${group.type}] ${group.stopName} (${group.routes[0]['노선명']})`;
 
             const squareIcon = L.divIcon({
                 className: '',
-                html: `<div class="stop-pin ${isMulti ? 'is-multi' : ''}" title="${titleText}">
+                html: `<div class="stop-pin ${pinTypeClass}" title="${titleText}">
                          <span>${count}</span>
                        </div>`,
                 iconSize: [size, size],
