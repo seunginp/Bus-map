@@ -74,10 +74,10 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
         }
         .mode-btn[data-mode="출근"].active {
-            background: #228BE6;
+            background: #7950F2;
         }
         .mode-btn[data-mode="퇴근"].active {
-            background: #7950F2;
+            background: #F76707;
         }
         .mode-btn[data-mode="전체"].active {
             background: #495057;
@@ -230,20 +230,20 @@
             font-weight: 700;
         }
         .tag-badge.badge-in {
-            background: #D0EBFF;
-            color: #1864AB;
-        }
-        .tag-badge.badge-out {
             background: #E5DBFF;
             color: #5F3DC4;
         }
+        .tag-badge.badge-out {
+            background: #FFE8CC;
+            color: #D9480F;
+        }
 
-        /* 정류장 경유노선 수 네모 핀 (1~10 숫자 모두 동일 색상 통일, 출근=파란색 / 퇴근=보라색 구분) */
+        /* 정류장 경유노선 수 네모 핀 (1~10 숫자 모두 동일 색상 통일, 출근=보라색 / 퇴근=주황색 구분) */
         .stop-pin {
             width: 24px;
             height: 24px;
             border-radius: 5px;
-            background: #228BE6;
+            background: #7950F2;
             color: white;
             border: 2px solid white;
             box-shadow: 0 2px 6px rgba(0,0,0,0.42);
@@ -256,31 +256,92 @@
             box-sizing: border-box;
         }
         .stop-pin.pin-in {
-            background: #228BE6;
+            background: #7950F2;
         }
         .stop-pin.pin-out {
-            background: #7950F2;
+            background: #F76707;
         }
         .stop-pin:hover {
             filter: brightness(1.12);
         }
 
-        /* 범례 */
+        /* 범례 (클릭하여 권역별 정류장 필터링 지원) */
         .legend {
             position: absolute; bottom: 20px; right: 20px; background: rgba(255, 255, 255, 0.96);
-            padding: 10px 14px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-            font-size: 12px; z-index: 1000; max-height: 240px; overflow-y: auto;
+            padding: 10px 12px; border-radius: 10px; box-shadow: 0 3px 14px rgba(0,0,0,0.16);
+            font-size: 12px; z-index: 1000; max-height: 280px; overflow-y: auto;
             border: 1px solid rgba(0,0,0,0.08);
             transition: opacity 0.2s ease, transform 0.2s ease;
         }
         .legend-title {
             font-weight: bold; margin-bottom: 6px; color: #333;
-            display: flex; align-items: center; justify-content: space-between; gap: 6px;
-            cursor: pointer; user-select: none;
+            display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            cursor: pointer; user-select: none; white-space: nowrap;
+        }
+        .legend-reset-btn {
+            background: #228be6;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 2px 7px;
+            font-size: 10.5px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .legend-reset-btn:hover {
+            background: #1c7ed6;
         }
         .legend-toggle-icon { display: none; font-size: 10px; color: #868e96; }
-        .legend-item { display: flex; align-items: center; margin-bottom: 5px; white-space: nowrap; }
-        .legend-color { width: 14px; height: 14px; border-radius: 3px; margin-right: 6px; opacity: 0.7; flex-shrink: 0; }
+        .legend-item {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 8px; padding: 4px 7px; margin-bottom: 3px; border-radius: 6px;
+            cursor: pointer; white-space: nowrap; user-select: none;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+        }
+        .legend-item:hover {
+            background: #f1f3f5;
+        }
+        .legend-item.active {
+            background: #e7f5ff;
+            border-color: #339af0;
+            font-weight: 700;
+            color: #1864ab;
+        }
+        .legend-item.dimmed {
+            opacity: 0.55;
+        }
+        .legend-item.dimmed:hover {
+            opacity: 0.9;
+        }
+        .legend-item-left {
+            display: flex; align-items: center; gap: 6px;
+        }
+        .legend-color { width: 14px; height: 14px; border-radius: 4px; opacity: 0.85; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.12); }
+
+        /* 지도 위 권역 다각형 구역 이름 라벨 배지 */
+        .region-zone-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 800;
+            color: #fff;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.28);
+            border: 1.5px solid rgba(255,255,255,0.92);
+            cursor: pointer;
+            user-select: none;
+            transform: translate(-50%, -50%);
+            transition: transform 0.15s ease, filter 0.15s ease;
+        }
+        .region-zone-label:hover {
+            transform: translate(-50%, -50%) scale(1.07);
+            filter: brightness(1.08);
+        }
         
         /* 마우스로 끌어서 이동 가능한 독립형 정보창 (Floating Info Box) - 글자 길이에 맞춰 가로폭 자동 조절 */
         .floating-info-box {
@@ -935,28 +996,36 @@
             attribution: '&copy; OpenStreetMap contributors', maxZoom: 18
         }).addTo(map);
 
-        // 노선 경로선이 지도 타일이나 권역 원에 묻히지 않고 항상 선명하게 보이도록 전용 Pane 생성
+        // 노선 경로선이 지도 타일이나 권역 다각형에 묻히지 않고 항상 선명하게 보이도록 전용 Pane 생성
         map.createPane('routePane');
         map.getPane('routePane').style.zIndex = 460;
         map.getPane('routePane').style.pointerEvents = 'none';
 
+        // 권역별 구역 경계를 뚜렷하게 구분하는 11개 고유 색상 팔레트
         const regionColors = {
-            '서울(강남)': '#FF6B6B', '서울(강동)': '#FFA94D', '서울(강북)': '#FFD43B',
-            '서울(강서)': '#69DB7C', '동탄': '#74C0FC', '성남(분당)': '#B197FC',
-            '수원': '#4ECDC4', '안양/과천': '#FF8FAB', '오산': '#A2D2FF',
-            '용인(수지)': '#A2D2FF', '인천/부천': '#63E6BE'
+            '서울(강남)': '#E64980',
+            '서울(강동)': '#FAB005',
+            '서울(강북)': '#0CA678',
+            '서울(강서)': '#37B24D',
+            '동탄': '#1C7ED6',
+            '성남(분당)': '#AE3EC9',
+            '수원': '#1098AD',
+            '안양/과천': '#F03E3E',
+            '오산': '#D9480F',
+            '용인(수지)': '#4263EB',
+            '인천/부천': '#74B816'
         };
 
-        // 파란색 정류장 핀(#339AF0, #1864AB)과 절대 중복되지 않는 고대비 노선 색상 팔레트
+        // 보라색(출근 #7950F2) 및 주황색(퇴근 #F76707) 정류장 핀과 뚜렷하게 구분되는 고대비 노선 색상 팔레트
         const routeColors = [
+            '#1C7ED6', // 선명한 파랑
             '#E03131', // 선명한 빨강
-            '#F08C00', // 진주황
             '#2F9E44', // 초록
-            '#9C36B5', // 보라
-            '#D63384', // 핑크/자주
-            '#E8590C', // 다크 오렌지
-            '#099268', // 에메랄드 그린
-            '#C2255C'  // 크림슨 핑크
+            '#C2255C', // 크림슨 핑크
+            '#0CA678', // 에메랄드 청록
+            '#3B5BDB', // 인디고 블루
+            '#D63384', // 마젠타
+            '#087F5B'  // 다크 틸
         ];
 
         const regionLayer = L.layerGroup().addTo(map);
@@ -966,6 +1035,7 @@
         const floatingBoxEl = document.getElementById('floatingInfoBox');
 
         let currentFilteredGroups = [];
+        let currentBaseGroups = [];
         let currentOrderMarkers = [];
         let currentActiveStopGroup = null;
         let currentActiveRouteIdx = 0;
@@ -982,6 +1052,7 @@
 
         let currentMode = '출근'; // '출근' | '퇴근' | '전체'
         let currentKeyword = '';
+        let currentSelectedRegion = null; // 권역 범례에서 선택된 권역명
 
         // 정보창 드래그 이동 이벤트 설정
         (function initDraggableInfoBox() {
@@ -1107,6 +1178,9 @@
             }
             const legendEl = document.getElementById('legend');
             if (legendEl) legendEl.classList.remove('hidden-by-popup');
+            if (!map.hasLayer(regionLayer)) {
+                map.addLayer(regionLayer);
+            }
             isBoxManuallyMoved = false;
             routeLayer.clearLayers();
             currentOrderMarkers.forEach(m => map.removeLayer(m));
@@ -1198,9 +1272,34 @@
             return `${item._type}__${item['노선명']}__${item['기점출발'] || ''}`;
         }
 
+        // 정류장 실제 위경도 좌표를 기반으로 권역 경계가 서로 겹치지 않도록 지리적 권역 판별
+        function getGeographicRegion(item) {
+            const lat = item.lat;
+            const lng = item.lng;
+            if (lng < 126.80) return '인천/부천';
+            if ((lat >= 37.530 && lng < 127.015) || (lat >= 37.535 && lng < 127.112) || (lat >= 37.582)) {
+                return '서울(강북)';
+            }
+            if (lat >= 37.492 && lng < 126.968) return '서울(강서)';
+            if ((lat >= 37.330 && lat < 37.492 && lng < 126.970) || (lat >= 37.330 && lat < 37.460 && lng < 127.015)) {
+                return '안양/과천';
+            }
+            if (lat >= 37.460 && lng < 127.082) return '서울(강남)';
+            if (lat >= 37.463 && lng >= 127.082) return '서울(강동)';
+            if (lat >= 37.340 && lat < 37.463 && lng >= 127.070) return '성남(분당)';
+            if (lat < 37.190 && lng < 127.078 && (item['지역'] === '오산' || lng < 127.056)) {
+                return '오산';
+            }
+            if (lat < 37.222 && lng >= 127.056) return '동탄';
+            if (lat < 37.330 && lng < 127.078) return '수원';
+            return '용인(수지)';
+        }
+
         // 1. 노선별 그룹화 및 2. 정류장 위치별(중복 방지) 그룹화
         busData.forEach(item => {
             item._type = getItemType(item);
+            item._geoRegion = getGeographicRegion(item);
+            item['지역'] = item._geoRegion;
 
             // 노선(회차)별 그룹
             const routeKey = getRouteKey(item);
@@ -1216,7 +1315,7 @@
                     lat: item.lat,
                     lng: item.lng,
                     stopName: item['승차정류장'],
-                    region: item['지역'] || '기타',
+                    region: item._geoRegion,
                     routes: []
                 };
             }
@@ -1755,8 +1854,11 @@
             currentOrderMarkers.forEach(m => map.removeLayer(m));
             currentOrderMarkers = [];
 
-            // 선택된 노선 제외하고 나머지 정류장은 지도에서 잠시 안 보이도록 markerLayer 비우기
+            // 선택된 노선 제외하고 나머지 정류장 및 권역 경계는 지도에서 잠시 안 보이도록 처리
             markerLayer.clearLayers();
+            if (map.hasLayer(regionLayer)) {
+                map.removeLayer(regionLayer);
+            }
 
             currentActiveStopGroup = stopGroup;
             currentActiveRouteIdx = initialRouteIdx;
@@ -1845,46 +1947,177 @@
             }
         }
 
-        // 지역 원 및 범례 갱신
+        // 2D 볼록 껍질(Convex Hull - Monotone Chain) 계산 함수
+        function computeConvexHull(pts) {
+            if (pts.length <= 2) return pts.slice();
+            const sorted = pts.slice().sort((a, b) => a[1] !== b[1] ? a[1] - b[1] : a[0] - b[0]);
+            const cross = (o, a, b) => (a[1] - o[1]) * (b[0] - o[0]) - (a[0] - o[0]) * (b[1] - o[1]);
+            const lower = [];
+            for (const p of sorted) {
+                while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) {
+                    lower.pop();
+                }
+                lower.push(p);
+            }
+            const upper = [];
+            for (let i = sorted.length - 1; i >= 0; i--) {
+                const p = sorted[i];
+                while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) {
+                    upper.pop();
+                }
+                upper.push(p);
+            }
+            upper.pop();
+            lower.pop();
+            return lower.concat(upper);
+        }
+
+        // 권역 내 정류장들을 감싸는 매끄러운 다각형 구역(Buffered Convex Hull Polygon) 생성
+        function computeRegionPolygon(points) {
+            const baseHull = computeConvexHull(points);
+            const padLat = 0.0042;
+            const padLng = 0.0054;
+            const expanded = [];
+            const angles = [0, Math.PI / 4, Math.PI / 2, (3 * Math.PI) / 4, Math.PI, (5 * Math.PI) / 4, (3 * Math.PI) / 2, (7 * Math.PI) / 4];
+            baseHull.forEach(pt => {
+                angles.forEach(ang => {
+                    expanded.push([
+                        pt[0] + Math.sin(ang) * padLat,
+                        pt[1] + Math.cos(ang) * padLng
+                    ]);
+                });
+            });
+            return computeConvexHull(expanded);
+        }
+
+        // 권역 범례 항목(또는 지도 위 권역 구역) 클릭 시 해당 권역 정류장만 필터링 토글
+        window.onLegendRegionClick = function(e, regionName) {
+            if (e) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+            if (currentSelectedRegion === regionName) {
+                currentSelectedRegion = null;
+            } else {
+                currentSelectedRegion = regionName;
+            }
+            applyFilter(true, false);
+        };
+
+        // 권역 선택 해제 (전체 권역 다시 보기)
+        window.resetRegionFilter = function(e) {
+            if (e) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+            currentSelectedRegion = null;
+            applyFilter(true, false);
+        };
+
+        // 권역 다각형 구역 및 범례 갱신
         const legendDiv = document.getElementById('legend');
-        function updateRegionsAndLegend(currentGroups) {
+        function updateRegionsAndLegend(baseGroups) {
             regionLayer.clearLayers();
             const isCollapsed = legendDiv.classList.contains('mobile-collapsed');
+            const resetBtnHtml = currentSelectedRegion
+                ? `<button type="button" class="legend-reset-btn" onclick="window.resetRegionFilter(event)" title="전체 권역 보기">전체 보기 ✕</button>`
+                : '';
+
             legendDiv.innerHTML = `
                 <div class="legend-title" onclick="window.toggleMobileLegend(event)">
-                    <span>📍 권역 범례</span>
-                    <span class="legend-toggle-icon">${isCollapsed ? '▲' : '▼'}</span>
+                    <span>📍 권역 범례 <small style="font-weight:normal; color:#868e96;">(클릭 선택)</small></span>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        ${resetBtnHtml}
+                        <span class="legend-toggle-icon">${isCollapsed ? '▲' : '▼'}</span>
+                    </div>
                 </div>
                 <div class="legend-body"></div>
             `;
             const legendBody = legendDiv.querySelector('.legend-body');
 
             const currentRegions = {};
-            currentGroups.forEach(g => {
+            baseGroups.forEach(g => {
                 const reg = g.region || '기타';
                 if (!currentRegions[reg]) currentRegions[reg] = [];
                 currentRegions[reg].push(g);
             });
 
-            const regionNames = Object.keys(currentRegions);
+            const preferredOrder = [
+                '서울(강남)', '서울(강동)', '서울(강북)', '서울(강서)',
+                '성남(분당)', '용인(수지)', '수원', '동탄', '오산', '안양/과천', '인천/부천'
+            ];
+            const regionNames = Object.keys(currentRegions).sort((a, b) => {
+                const ia = preferredOrder.indexOf(a);
+                const ib = preferredOrder.indexOf(b);
+                if (ia !== -1 && ib !== -1) return ia - ib;
+                if (ia !== -1) return -1;
+                if (ib !== -1) return 1;
+                return a.localeCompare(b, 'ko');
+            });
+
             if (regionNames.length === 0) {
                 legendBody.innerHTML += '<div style="color:#888; font-size:11px;">표시할 지역 없음</div>';
                 return;
             }
 
             regionNames.forEach(regionName => {
-                const points = currentRegions[regionName].map(g => [g.lat, g.lng]);
-                const bounds = L.latLngBounds(points);
-                const color = regionColors[regionName] || '#CCCCCC';
-                L.circle(bounds.getCenter(), {
-                    radius: 5000, color: color, fillColor: color, fillOpacity: 0.08, weight: 1.5,
-                    interactive: false
-                }).addTo(regionLayer);
+                const groupsInReg = currentRegions[regionName];
+                const points = groupsInReg.map(g => [g.lat, g.lng]);
+                const color = regionColors[regionName] || '#868E96';
+                const isSelected = (currentSelectedRegion === regionName);
+                const isDimmed = (currentSelectedRegion !== null && !isSelected);
+                const safeReg = regionName.replace(/'/g, "\\'");
+
+                // 원 모양 대신 해당 권역의 정류장 분포를 감싸는 명확한 다각형 구역(Polygon Zone) 표시
+                if (!isDimmed) {
+                    const polyLatLngs = computeRegionPolygon(points);
+                    const poly = L.polygon(polyLatLngs, {
+                        color: color,
+                        weight: isSelected ? 3.2 : 2.2,
+                        opacity: isSelected ? 0.95 : 0.82,
+                        dashArray: isSelected ? null : '6, 4',
+                        fillColor: color,
+                        fillOpacity: isSelected ? 0.22 : 0.13,
+                        interactive: true
+                    }).addTo(regionLayer);
+
+                    poly.on('click', function(ev) {
+                        L.DomEvent.stopPropagation(ev);
+                        window.onLegendRegionClick(null, regionName);
+                    });
+
+                    // 구역 중심에 권역명 라벨 배지 표시 (클릭 시 해당 권역 필터 토글)
+                    const center = L.latLngBounds(polyLatLngs).getCenter();
+                    const labelIcon = L.divIcon({
+                        className: '',
+                        html: `<div class="region-zone-label" style="background:${color};" title="${regionName} 권역 정류장만 보기 (${groupsInReg.length}개)">
+                                 <span>${regionName}</span>
+                                 <span style="opacity:0.9; font-weight:700;">${groupsInReg.length}</span>
+                               </div>`,
+                        iconSize: [0, 0],
+                        iconAnchor: [0, 0]
+                    });
+                    const labelMarker = L.marker(center, {
+                        icon: labelIcon,
+                        zIndexOffset: 100
+                    }).addTo(regionLayer);
+                    labelMarker.on('click', function(ev) {
+                        L.DomEvent.stopPropagation(ev);
+                        window.onLegendRegionClick(null, regionName);
+                    });
+                }
 
                 legendBody.innerHTML += `
-                    <div class="legend-item">
-                        <div class="legend-color" style="background:${color}"></div>
-                        <span>${regionName} <small style="color:#888;">(${currentRegions[regionName].length})</small></span>
+                    <div class="legend-item ${isSelected ? 'active' : ''} ${isDimmed ? 'dimmed' : ''}"
+                         onclick="window.onLegendRegionClick(event, '${safeReg}')"
+                         title="클릭하여 '${regionName}' 권역 정류장만 지도에 표시">
+                        <div class="legend-item-left">
+                            <div class="legend-color" style="background:${color}"></div>
+                            <span>${regionName}</span>
+                        </div>
+                        <small style="color:${isSelected ? '#1864ab' : '#868e96'}; font-weight:${isSelected ? '700' : 'normal'};">
+                            ${groupsInReg.length}개${isSelected ? ' ✓' : ''}
+                        </small>
                     </div>`;
             });
         }
@@ -1999,7 +2232,8 @@
 
             const query = currentKeyword.toLowerCase();
 
-            const filtered = Object.values(stopGroups).filter(group => {
+            // 1단계: 모드(출근/퇴근/전체) 및 검색어 필터링 (권역 범례 목록 계산용)
+            const baseFiltered = Object.values(stopGroups).filter(group => {
                 if (currentMode !== '전체' && group.type !== currentMode) {
                     return false;
                 }
@@ -2021,6 +2255,18 @@
                 return true;
             });
 
+            currentBaseGroups = baseFiltered;
+
+            // 선택된 권역이 현재 결과에 존재하지 않으면 권역 필터 자동 해제
+            if (currentSelectedRegion && !baseFiltered.some(g => g.region === currentSelectedRegion)) {
+                currentSelectedRegion = null;
+            }
+
+            // 2단계: 권역 범례에서 특정 권역이 선택된 경우 해당 권역의 정류장만 지도에 표시
+            const filtered = currentSelectedRegion
+                ? baseFiltered.filter(g => g.region === currentSelectedRegion)
+                : baseFiltered;
+
             currentFilteredGroups = filtered;
 
             const boundsPoints = [];
@@ -2041,9 +2287,10 @@
                 resultsListEl.style.display = 'none';
             } else {
                 const modeLabel = currentMode === '전체' ? '전체' : currentMode;
+                const regionNote = currentSelectedRegion ? ` · <b style="color:#1c7ed6;">[${currentSelectedRegion}]</b>` : '';
                 const filterNote = query ? ` ('${currentKeyword}' 검색)` : '';
                 const totalRoutesInFiltered = filtered.reduce((acc, g) => acc + g.routes.length, 0);
-                statusEl.innerHTML = `<span><b>${modeLabel}</b> 정류장 <span class="badge-count">${filtered.length}개</span> (노선 ${totalRoutesInFiltered}건)${filterNote}</span>`;
+                statusEl.innerHTML = `<span><b>${modeLabel}</b>${regionNote} 정류장 <span class="badge-count">${filtered.length}개</span> (노선 ${totalRoutesInFiltered}건)${filterNote}</span>`;
 
                 if (query) {
                     renderSearchResultsList(filtered, query);
@@ -2059,11 +2306,11 @@
                     if (exactRoute || matchedRoutes.length === 1) {
                         const targetRk = exactRoute || matchedRoutes[0];
                         window.onRouteSelectFromSearch(targetRk);
-                        updateRegionsAndLegend(filtered);
+                        updateRegionsAndLegend(baseFiltered);
                         return;
                     } else if (filtered.length === 1 || fromExplicitSearch) {
                         window.onSearchResultClick(filtered[0].key);
-                        updateRegionsAndLegend(filtered);
+                        updateRegionsAndLegend(baseFiltered);
                         return;
                     }
                 } else {
@@ -2071,11 +2318,11 @@
                 }
 
                 if (autoFit && boundsPoints.length > 0) {
-                    map.fitBounds(L.latLngBounds(boundsPoints).pad(0.1));
+                    map.fitBounds(L.latLngBounds(boundsPoints).pad(0.12));
                 }
             }
 
-            updateRegionsAndLegend(filtered);
+            updateRegionsAndLegend(baseFiltered);
         }
 
         // 출근/퇴근/전체 모드 전환
